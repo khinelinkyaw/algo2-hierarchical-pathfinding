@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24...3.30)
-project(raylib-game-template)
+project(hierarchical-pathfinding)
 
 include(FetchContent)
 
@@ -25,6 +25,8 @@ add_subdirectory(src)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 
 if ("${PLATFORM}" STREQUAL "Web")
@@ -43,6 +45,13 @@ endif()
 
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
+
+if(MSVC)
+  # compile at warning level 4 + treat warnings as errors
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+else()
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
+endif()
 
 # Web Configurations
 if ("${PLATFORM}" STREQUAL "Web")
