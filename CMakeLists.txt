@@ -53,7 +53,7 @@ else()
   target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_DEBUG "-Zi")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 # Web Configurations
