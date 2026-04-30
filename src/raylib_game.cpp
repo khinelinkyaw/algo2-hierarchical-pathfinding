@@ -12,16 +12,19 @@
 *
 ********************************************************************************************/
 
-#include "raylib.h"
 #include "constants.h"
+#include "raylib.h"
+#include "scene.h"
+#include "grid.h"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
 #endif
 
-Font font = { 0 };
-Music music = { 0 };
-Sound fxCoin = { 0 };
+Font font{ 0 };
+Music music { 0 };
+Sound fxCoin { 0 };
+Scene scene{};
 
 static void UpdateDrawFrame(void);          // Update and draw one frame
 
@@ -40,6 +43,8 @@ int main(void)
 
     SetMusicVolume(music, 1.0f);
     PlayMusicStream(music);
+
+    scene.SetGrid(Grid{ 100,100 });
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -73,6 +78,7 @@ static void UpdateDrawFrame(void)
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
+    scene.Draw();
     DrawFPS(10, 10);
 
     EndDrawing();
