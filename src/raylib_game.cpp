@@ -77,9 +77,8 @@ static void UpdateDrawFrame(void)
 {
     BeginDrawing();
 
-    ClearBackground(RAYWHITE);
+    scene.Update();
     scene.Draw();
-    DrawFPS(10, 10);
 
     EndDrawing();
 }

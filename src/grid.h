@@ -4,15 +4,25 @@
 #include "structs.h"
 #include "constants.h"
 
+#include <vector>
+
 class Grid final
 {
 private:
+    enum class CellType
+    {
+        Empty,
+        Obstacle
+    };
+
     int m_Rows{};
     int m_Cols{};
+    std::vector<std::vector<CellType>> m_Cells{};
     vec2<int> m_Position{};
     vec2<int> m_Dimensions{};
 
 public:
+    void Update();
     void Draw() const;
 
     Grid() = default;

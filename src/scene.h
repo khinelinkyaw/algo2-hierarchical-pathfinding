@@ -12,7 +12,8 @@ public:
     void SetGrid(Grid const& grid) { m_Grid = grid; }
     void SetGrid(Grid&& grid) { m_Grid = grid; }
 
-    void Draw();
+    void Update();
+    void Draw() const;
 };
 
 #endif
