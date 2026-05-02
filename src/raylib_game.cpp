@@ -44,7 +44,7 @@ int main(void)
     SetMusicVolume(music, 1.0f);
     PlayMusicStream(music);
 
-    scene.SetGrid(Grid{ 100,100 });
+    scene.SetGrid(Grid{ 10,20 });
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);

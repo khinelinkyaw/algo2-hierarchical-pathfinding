@@ -9,7 +9,7 @@ void Grid::Update()
     int cellRowSize{ m_Dimensions.y / m_Rows };
     int cellColSize{ m_Dimensions.x / m_Cols };
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
     {
         auto mousePos{ GetMousePosition() };
 
