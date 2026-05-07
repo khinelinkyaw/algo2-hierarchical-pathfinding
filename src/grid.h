@@ -1,26 +1,24 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "structs.h"
-#include "constants.h"
+#include <structs.h>
+#include <constants.h>
+#include <cell.h>
+#include <connection.h>
 
 #include <vector>
 
 class Grid final
 {
 private:
-    enum class CellType
-    {
-        Empty,
-        Obstacle
-    };
-
     int m_Rows{};
     int m_Cols{};
-    std::vector<std::vector<CellType>> m_Cells{};
+    std::vector<Cell> m_Cells{};
+    std::vector<Connection> m_Connections{};
     vec2<int> m_Position{};
     vec2<int> m_Dimensions{};
 
+    Cell* GetCell(int cellId);
 public:
     void Update();
     void Draw() const;

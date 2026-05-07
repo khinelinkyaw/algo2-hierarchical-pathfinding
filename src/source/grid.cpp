@@ -1,8 +1,24 @@
 #include <grid.h>
 #include <raylib.h>
 #include <structs.h>
+#include <cell.h>
 
+#include <algorithm>
 #include <cmath>
+
+Cell* Grid::GetCell(int cellId)
+{
+    auto iter{ std::ranges::find_if(m_Cells, [cellId](Cell const& cell)
+    {
+        return cell.GetId() == cellId;
+    })};
+
+    if (iter != m_Cells.end())
+    {
+        return &*iter;
+    }
+    return nullptr;
+}
 
 void Grid::Update()
 {
@@ -25,15 +41,16 @@ void Grid::Update()
             int mouseGridPosX{ static_cast<int>(floor((mousePos.x - m_Position.x)/cellColSize)) };
             int mouseGridPosY{ static_cast<int>(floor((mousePos.y - m_Position.y)/cellRowSize)) };
 
-            CellType& currentGridType{ m_Cells[mouseGridPosY][mouseGridPosX] };
+            int cellIndex{ (mouseGridPosY * m_Cols) + mouseGridPosX };
+            CellType currentCellType{ m_Cells[cellIndex].GetCellType()};
 
-            switch (currentGridType)
+            switch (currentCellType)
             {
-            case Grid::CellType::Empty:
-                currentGridType = CellType::Obstacle;
+            case CellType::Empty:
+                m_Cells[cellIndex].SetCellType(CellType::Obstacle);
                 break;
-            case Grid::CellType::Obstacle:
-                currentGridType = CellType::Empty;
+            case CellType::Obstacle:
+                m_Cells[cellIndex].SetCellType(CellType::Empty);
                 break;
             }
         }
@@ -45,20 +62,20 @@ void Grid::Draw() const
     int cellRowSize{ m_Dimensions.y / m_Rows };
     int cellColSize{ m_Dimensions.x / m_Cols };
 
-    for (int row{ 0 }; row < m_Rows; ++row)
+    for (int index{ 0 }; index < static_cast<int>(m_Cells.size()); ++index)
     {
-        for (int col{ 0 }; col < m_Cols; ++col)
+        if (m_Cells[index].GetCellType() == CellType::Obstacle)
         {
-            if (m_Cells[row][col] == CellType::Obstacle)
-            {
-                DrawRectangle(
-                    m_Position.x + (col * cellColSize),
-                    m_Position.y + (row * cellRowSize),
-                    cellColSize,
-                    cellRowSize,
-                    RED
-                );
-            }
+            int cellRow{ static_cast<int>(index / m_Cols) };
+            int cellCol{ index % m_Cols };
+
+            DrawRectangle(
+                m_Position.x + (cellCol * cellColSize),
+                m_Position.y + (cellRow * cellRowSize),
+                cellColSize,
+                cellRowSize,
+                RED
+            );
         }
     }
 
@@ -95,10 +112,29 @@ Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)
     , m_Position{posX, posY}
     , m_Dimensions{width, height}
 {
-    m_Cells.resize(rows);
-    
-    for (auto& row : m_Cells)
+    int totalCells{ rows * cols };
+    m_Cells.reserve(totalCells);
+    m_Connections.reserve(totalCells);
+
+    for (int index{ 0 }; index < totalCells; ++index)
     {
-        row.resize(cols, CellType::Empty );
+        m_Cells.emplace_back(index, CellType::Empty);
+
+        if (index - 1 >= 0)
+        {
+            m_Connections.emplace_back(index, index - 1);
+        }
+        if (index - m_Rows >= 0)
+        {
+            m_Connections.emplace_back(index, index - m_Rows);
+        }
+        if (index + 1 < totalCells)
+        {
+            m_Connections.emplace_back(index, index + 1);
+        }
+        if (index + m_Rows < totalCells)
+        {
+            m_Connections.emplace_back(index, index + m_Rows);
+        }
     }
 }
