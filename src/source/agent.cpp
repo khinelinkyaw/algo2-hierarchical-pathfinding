@@ -1,6 +1,6 @@
-#include "agent.h"
-#include "raylib.h"
-#include "structs.h"
+#include <agent.h>
+#include <raylib.h>
+#include <structs.h>
 
 #include <cstdlib>
  

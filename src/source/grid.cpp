@@ -1,6 +1,6 @@
-#include "grid.h"
-#include "raylib.h"
-#include "structs.h"
+#include <grid.h>
+#include <raylib.h>
+#include <structs.h>
 
 #include <cmath>
 

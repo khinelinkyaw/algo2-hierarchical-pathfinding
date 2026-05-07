@@ -10,7 +10,7 @@ private:
     static float constexpr m_Radius{ 15.f };
     vec2<float> m_Position{100.f, 100.f};
     vec2<float> m_Destination{};
-    float m_Speed{ 5.f };
+    float m_Speed{ 1.f };
 
 public:
     void Update();

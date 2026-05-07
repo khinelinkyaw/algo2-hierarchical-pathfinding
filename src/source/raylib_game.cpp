@@ -12,10 +12,10 @@
 *
 ********************************************************************************************/
 
-#include "constants.h"
-#include "raylib.h"
-#include "scene.h"
-#include "grid.h"
+#include <constants.h>
+#include <raylib.h>
+#include <scene.h>
+#include <grid.h>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
