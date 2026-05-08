@@ -13,9 +13,12 @@
 ********************************************************************************************/
 
 #include <constants.h>
-#include <raylib.h>
 #include <scene.h>
 #include <grid.h>
+
+#include <raylib.h>
+#define RAYGUI_IMPLEMENTATION
+#include <raygui.h>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -25,6 +28,7 @@ Font font{ 0 };
 Music music { 0 };
 Sound fxCoin { 0 };
 Scene scene{};
+bool showMessageBox{};
 
 static void UpdateDrawFrame(void);          // Update and draw one frame
 
@@ -79,6 +83,17 @@ static void UpdateDrawFrame(void)
 
     scene.Update();
     scene.Draw();
+
+    if (GuiButton(Rectangle(24, 24, 120, 30 ), "#191#Show Message")) showMessageBox = true;
+
+    if (showMessageBox)
+    {
+        int result = GuiMessageBox(Rectangle{ 85, 70, 250, 100 },
+            "#191#Message Box", "Hi! This is a message!", "Nice;Cool");
+
+        if (result >= 0) showMessageBox = false;
+    }
+
 
     EndDrawing();
 }

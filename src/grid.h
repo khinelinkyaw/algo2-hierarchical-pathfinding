@@ -7,18 +7,25 @@
 #include <connection.h>
 
 #include <vector>
+#include <set>
 
 class Grid final
 {
 private:
     int m_Rows{};
     int m_Cols{};
+    vec2<int> m_Dimensions{};
+    int m_CellWidth{};
+    int m_CellHeight{};
     std::vector<Cell> m_Cells{};
     std::vector<Connection> m_Connections{};
     vec2<int> m_Position{};
-    vec2<int> m_Dimensions{};
 
     Cell* GetCell(int cellId);
+    vec2<int> GetCellCenter(Cell const& cell) const;
+    vec2<int> GetCellCenter(int cellId) const;
+    void CreateNewConnection(int cellAId, int cellBId);
+
 public:
     void Update();
     void Draw() const;

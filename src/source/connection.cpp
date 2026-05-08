@@ -25,3 +25,16 @@ Connection::Connection(int firstCell, int secondCell)
     , m_SecondEnd{secondCell}
 {
 }
+
+bool Connection::operator==(Connection const& other) const
+{
+    return (
+        (m_FirstEnd == other.m_FirstEnd and m_SecondEnd == other.m_SecondEnd) or
+        (m_FirstEnd == other.m_SecondEnd and m_SecondEnd == other.m_FirstEnd)
+        );
+}
+
+bool Connection::operator<(Connection const& other) const
+{
+    return m_FirstEnd < other.m_FirstEnd or (m_FirstEnd == other.m_FirstEnd and m_SecondEnd < other.m_SecondEnd);
+}

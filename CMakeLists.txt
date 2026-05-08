@@ -11,12 +11,21 @@ set(RAYLIB_VERSION 5.5)
 
 FetchContent_Declare(
     raylib
-    DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    DOWNLOAD_EXTRACT_TIMESTAMP ON
     URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
     FIND_PACKAGE_ARGS
 )
 
 FetchContent_MakeAvailable(raylib)
+
+set(RAYGUI_VERSION 4.0)
+
+FetchContent_Declare(
+    raygui
+    GIT_REPOSITORY https://github.com/raysan5/raygui.git
+    GIT_TAG        ${RAYGUI_VERSION}
+)
+FetchContent_MakeAvailable(raygui)
 
 # Our Project
 add_executable(${PROJECT_NAME})
@@ -42,6 +51,10 @@ else()
     )
     #DEPENDS ${PROJECT_NAME}
 endif()
+
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE
+    ${raygui_SOURCE_DIR}/src
+)
 
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)

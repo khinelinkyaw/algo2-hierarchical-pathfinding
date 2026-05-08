@@ -15,6 +15,9 @@ public:
     int GetConnectedToCell(int cellId) const;
 
     Connection(int firstCell, int secondCell);
+
+    bool operator==(Connection const& other) const;
+    bool operator<(Connection const& other) const;
 };
 
 #endif
