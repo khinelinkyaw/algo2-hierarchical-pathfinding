@@ -7,14 +7,17 @@
 class Connection final
 {
 private:
-    int m_FirstEnd{ Cell::INVALID_CELL_ID };
-    int m_SecondEnd{ Cell::INVALID_CELL_ID };
+    int m_FromCell{ Cell::INVALID_CELL_ID };
+    int m_ToCell{ Cell::INVALID_CELL_ID };
+    float m_Weight{ 1.f };
 
 public:
     std::pair<int, int> GetConnectedCells() const;
-    int GetConnectedToCell(int cellId) const;
+    int GetToCell() const { return m_ToCell;  }
+    int GetFromCell() const { return m_FromCell; }
+    float GetWeight() const { return m_Weight; }
 
-    Connection(int firstCell, int secondCell);
+    Connection(int fromCell, int toCell);
 
     bool operator==(Connection const& other) const;
     bool operator<(Connection const& other) const;

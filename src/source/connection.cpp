@@ -4,37 +4,21 @@
 
 std::pair<int, int> Connection::GetConnectedCells() const
 {
-    return std::pair<int, int>{m_FirstEnd, m_SecondEnd};
+    return std::pair<int, int>{m_FromCell, m_ToCell};
 }
 
-int Connection::GetConnectedToCell(int cellId) const
-{
-    if (cellId == m_FirstEnd)
-    {
-        return m_SecondEnd;
-    }
-    else if (cellId == m_SecondEnd)
-    {
-        return m_FirstEnd;
-    }
-    return Cell::INVALID_CELL_ID;
-}
-
-Connection::Connection(int firstCell, int secondCell)
-    : m_FirstEnd{firstCell}
-    , m_SecondEnd{secondCell}
+Connection::Connection(int fromCell, int toCell)
+    : m_FromCell{ fromCell }
+    , m_ToCell{ toCell }
 {
 }
 
 bool Connection::operator==(Connection const& other) const
 {
-    return (
-        (m_FirstEnd == other.m_FirstEnd and m_SecondEnd == other.m_SecondEnd) or
-        (m_FirstEnd == other.m_SecondEnd and m_SecondEnd == other.m_FirstEnd)
-        );
+    return m_FromCell == other.m_FromCell and m_ToCell == other.m_ToCell;
 }
 
 bool Connection::operator<(Connection const& other) const
 {
-    return m_FirstEnd < other.m_FirstEnd or (m_FirstEnd == other.m_FirstEnd and m_SecondEnd < other.m_SecondEnd);
+    return m_FromCell < other.m_FromCell or (m_FromCell == other.m_FromCell and m_ToCell < other.m_ToCell);
 }

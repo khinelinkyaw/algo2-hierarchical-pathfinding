@@ -1,12 +1,15 @@
 #include <cell.h>
 #include <grid.h>
-#include <raylib.h>
 #include <structs.h>
+
+#include <raylib.h>
+#include <raygui.h>
 
 #include <algorithm>
 #include <cmath>
 #include <connection.h>
 #include <vector>
+#include <string>
 
 Cell* Grid::GetCell(int cellId)
 {
@@ -35,7 +38,7 @@ Cell* Grid::GetCell(int rowIndex, int colIndex)
 
 Cell* Grid::GetCell(float worldX, float worldY)
 {
-    auto [rowIndex, colIndex] { ConvertWorldToCellIndex(worldX, worldY) };
+    auto [colIndex, rowIndex] { ConvertWorldToCellIndex(worldX, worldY) };
 
     return GetCell(rowIndex, colIndex);
 }
@@ -64,7 +67,7 @@ std::vector<Connection*> Grid::FindConnectionsFromCell(int cellId)
 
     for (auto& connection : m_Connections)
     {
-        if (connection.GetConnectedToCell(cellId) != Cell::INVALID_CELL_ID)
+        if (connection.GetFromCell() == cellId)
         {
             result.push_back(&connection);
         }
@@ -129,11 +132,11 @@ void Grid::Draw() const
 {
     for (int index{ 0 }; index < static_cast<int>(m_Cells.size()); ++index)
     {
+        int cellRow{ static_cast<int>(index / m_Cols) };
+        int cellCol{ index % m_Cols };
+
         if (m_Cells[index].GetCellType() == CellType::Obstacle)
         {
-            int cellRow{ static_cast<int>(index / m_Cols) };
-            int cellCol{ index % m_Cols };
-
             DrawRectangle(
                 m_Position.x + (cellCol * m_CellWidth),
                 m_Position.y + (cellRow * m_CellHeight),
@@ -142,6 +145,15 @@ void Grid::Draw() const
                 RED
             );
         }
+
+        Rectangle targetRect{
+            static_cast<float>(m_Position.x + (cellCol * m_CellWidth)),
+            static_cast<float>(m_Position.y + (cellRow * m_CellHeight)),
+            static_cast<float>(m_CellWidth),
+            static_cast<float>(m_CellHeight),
+        };
+
+        GuiLabel(targetRect, std::to_string(index).c_str());
     }
 
     for (int index{ 0 }; index < m_Rows; ++index)
@@ -216,19 +228,19 @@ Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)
 
         if (index - 1 >= 0 and index % m_Cols != 0)
         {
-            CreateNewConnection(index, index - 1);
+            m_Connections.emplace_back(index, index - 1);
         }
         if (index - m_Cols >= 0)
         {
-            CreateNewConnection(index, index - m_Cols);
+            m_Connections.emplace_back(index, index - m_Cols);
         }
         if (index + 1 < totalCells and (index + 1) % m_Cols != 0)
         {
-            CreateNewConnection(index, index + 1);
+            m_Connections.emplace_back(index, index + 1);
         }
         if (index + m_Cols < totalCells)
         {
-            CreateNewConnection(index, index + m_Cols);
+            m_Connections.emplace_back(index, index + m_Cols);
         }
     }
 }
