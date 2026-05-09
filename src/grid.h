@@ -7,7 +7,6 @@
 #include <connection.h>
 
 #include <vector>
-#include <set>
 
 class Grid final
 {
@@ -21,12 +20,18 @@ private:
     std::vector<Connection> m_Connections{};
     vec2<int> m_Position{};
 
-    Cell* GetCell(int cellId);
-    vec2<int> GetCellCenter(Cell const& cell) const;
-    vec2<int> GetCellCenter(int cellId) const;
     void CreateNewConnection(int cellAId, int cellBId);
+    vec2<int> ConvertWorldToCellIndex(float worldX, float worldY) const;
 
 public:
+    Cell* GetCell(int cellId);
+    Cell* GetCell(int rowIndex, int colIndex);
+    Cell* GetCell(float worldX, float worldY);
+
+    vec2<int> GetCellCenter(Cell const& cell) const;
+    vec2<int> GetCellCenter(int cellId) const;
+    std::vector<Connection*> FindConnectionsFromCell(int cellId);
+
     void Update();
     void Draw() const;
 
