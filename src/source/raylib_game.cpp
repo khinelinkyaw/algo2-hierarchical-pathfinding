@@ -57,6 +57,10 @@ int main(void)
     //--------------------------------------------------------------------------------------
 
     // Main game loop
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 18);
+    GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_TOP);
+    GuiSetStyle(DEFAULT, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+    GuiSetStyle(LABEL, TEXT_PADDING, 6);
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         UpdateDrawFrame();
