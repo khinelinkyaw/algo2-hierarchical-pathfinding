@@ -47,4 +47,25 @@ void Agent::Draw() const
         static_cast<int>(m_Position.y),
         m_Radius,
         BLUE);
+
+    if (m_Path.empty())
+    {
+        return;
+    }
+
+    for (auto iter{ m_Path.begin() }; iter != m_Path.end(); ++iter)
+    {
+        if ((iter + 1) != m_Path.end())
+        {
+            Vector2 start{ iter->x, iter->y };
+            Vector2 end{ (iter + 1)->x, (iter + 1)->y };
+
+            DrawLineEx(
+                start,
+                end,
+                5.f,
+                GRAY
+            );
+        }
+    }
 }

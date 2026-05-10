@@ -37,6 +37,7 @@ public:
 
     Grid() = default;
     Grid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::SCREEN_HEIGHT);
+    void GenerationConnections();
 };
 
 #endif

@@ -77,14 +77,20 @@ std::vector<Connection*> Grid::FindConnectionsFromCell(int cellId)
 
 void Grid::CreateNewConnection(int cellAId, int cellBId)
 {
-    Connection newConnection{ cellAId, cellBId };
+    auto cellA{ GetCell(cellAId) };
+    auto cellB{ GetCell(cellBId) };
 
-    auto iter{ std::ranges::find(m_Connections, newConnection) };
-
-    if (iter == m_Connections.end())
+    if (cellA == nullptr or cellB == nullptr)
     {
-        m_Connections.push_back(newConnection);
+        return;
     }
+
+    if (cellA->GetCellType() == CellType::Obstacle or cellB->GetCellType() == CellType::Obstacle)
+    {
+        return;
+    }
+
+    m_Connections.emplace_back(cellAId, cellBId);
 }
 
 vec2<int> Grid::ConvertWorldToCellIndex(float worldX, float worldY) const
@@ -124,6 +130,8 @@ void Grid::Update()
                 m_Cells[cellIndex].SetCellType(CellType::Empty);
                 break;
             }
+
+            GenerationConnections();
         }
     }
 }
@@ -225,22 +233,32 @@ Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)
     for (int index{ 0 }; index < totalCells; ++index)
     {
         m_Cells.emplace_back(index, CellType::Empty);
+    }
 
+    GenerationConnections();
+}
+
+void Grid::GenerationConnections()
+{
+    m_Connections.clear();
+
+    for (int index{ 0 }; index < m_Cells.size(); ++index)
+    {
         if (index - 1 >= 0 and index % m_Cols != 0)
         {
-            m_Connections.emplace_back(index, index - 1);
+            CreateNewConnection(index, index - 1);
         }
         if (index - m_Cols >= 0)
         {
-            m_Connections.emplace_back(index, index - m_Cols);
+            CreateNewConnection(index, index - m_Cols);
         }
-        if (index + 1 < totalCells and (index + 1) % m_Cols != 0)
+        if (index + 1 < m_Cells.size() and (index + 1) % m_Cols != 0)
         {
-            m_Connections.emplace_back(index, index + 1);
+            CreateNewConnection(index, index + 1);
         }
-        if (index + m_Cols < totalCells)
+        if (index + m_Cols < m_Cells.size())
         {
-            m_Connections.emplace_back(index, index + m_Cols);
+            CreateNewConnection(index, index + m_Cols);
         }
     }
 }
