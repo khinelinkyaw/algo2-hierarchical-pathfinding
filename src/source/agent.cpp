@@ -46,7 +46,7 @@ void Agent::Draw() const
         static_cast<int>(m_Position.x),
         static_cast<int>(m_Position.y),
         m_Radius,
-        BLUE);
+        RAYWHITE);
 
     if (m_Path.empty())
     {
@@ -64,7 +64,7 @@ void Agent::Draw() const
                 start,
                 end,
                 5.f,
-                GRAY
+                MAROON
             );
         }
     }

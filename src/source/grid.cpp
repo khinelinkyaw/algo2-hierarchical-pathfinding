@@ -101,38 +101,35 @@ vec2<int> Grid::ConvertWorldToCellIndex(float worldX, float worldY) const
     );
 }
 
-void Grid::Update()
+void Grid::MouseClicked()
 {
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    auto mousePos{ GetMousePosition() };
+
+    Rectangle gridRect{
+        static_cast<float>(m_Position.x),
+        static_cast<float>(m_Position.y),
+        static_cast<float>(m_Dimensions.x),
+        static_cast<float>(m_Dimensions.y)
+    };
+
+    if (CheckCollisionPointRec(mousePos, gridRect))
     {
-        auto mousePos{ GetMousePosition() };
+        auto [mouseGridX, mouseGridY] { ConvertWorldToCellIndex(mousePos.x, mousePos.y) };
 
-        Rectangle gridRect{
-            static_cast<float>(m_Position.x),
-            static_cast<float>(m_Position.y),
-            static_cast<float>(m_Dimensions.x),
-            static_cast<float>(m_Dimensions.y)
-        };
+        int cellIndex{ (mouseGridY * m_Cols) + mouseGridX };
+        CellType currentCellType{ m_Cells[cellIndex].GetCellType()};
 
-        if (CheckCollisionPointRec(mousePos, gridRect))
+        switch (currentCellType)
         {
-            auto [mouseGridX, mouseGridY] { ConvertWorldToCellIndex(mousePos.x, mousePos.y) };
-
-            int cellIndex{ (mouseGridY * m_Cols) + mouseGridX };
-            CellType currentCellType{ m_Cells[cellIndex].GetCellType()};
-
-            switch (currentCellType)
-            {
-            case CellType::Empty:
-                m_Cells[cellIndex].SetCellType(CellType::Obstacle);
-                break;
-            case CellType::Obstacle:
-                m_Cells[cellIndex].SetCellType(CellType::Empty);
-                break;
-            }
-
-            GenerationConnections();
+        case CellType::Empty:
+            m_Cells[cellIndex].SetCellType(CellType::Obstacle);
+            break;
+        case CellType::Obstacle:
+            m_Cells[cellIndex].SetCellType(CellType::Empty);
+            break;
         }
+
+        GenerationConnections();
     }
 }
 
@@ -150,7 +147,7 @@ void Grid::Draw() const
                 m_Position.y + (cellRow * m_CellHeight),
                 m_CellWidth,
                 m_CellHeight,
-                RED
+                { 190, 33, 55, 100 }
             );
         }
 
@@ -173,7 +170,7 @@ void Grid::Draw() const
             startPos.y,
             endPos.x,
             endPos.y,
-            LIME
+            {200,200,200,100}
         );
     }
 
@@ -186,7 +183,7 @@ void Grid::Draw() const
             startPos.y,
             endPos.x,
             endPos.y,
-            LIME
+            { 200,200,200,100 }
         );
     }
 

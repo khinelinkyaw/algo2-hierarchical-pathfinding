@@ -21,26 +21,49 @@ void Scene::Update()
     if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT))
     {
         auto mousePos{ GetMousePosition() };
+        m_DestCell = m_Grid.GetCell(mousePos.x, mousePos.y);
 
-        auto [startCellPosX, startCellPosY] { m_Agent.GetPosition() };
-        auto startCell{ m_Grid.GetCell(startCellPosX, startCellPosY) };
-        auto destCell{ m_Grid.GetCell(mousePos.x, mousePos.y) };
-
-        if (startCell != nullptr and destCell != nullptr)
-        {
-            auto cellPath{ m_Astar.FindPath(startCell, destCell) };
-            auto floatPath{ m_Astar.ConvertToFloatPath(cellPath) };
-            m_Agent.SetPath(floatPath);
-        }
+        RefreshPathForAgent();
     }
 
-    m_Grid.Update();
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    {
+        m_Grid.MouseClicked();
+        RefreshPathForAgent();
+    }
+
     m_Agent.Update();
+}
+
+void Scene::RefreshPathForAgent()
+{
+    auto [startCellPosX, startCellPosY] { m_Agent.GetPosition() };
+    auto startCell{ m_Grid.GetCell(startCellPosX, startCellPosY) };
+
+    if (startCell != nullptr and m_DestCell != nullptr)
+    {
+        auto cellPath{ m_Astar.FindPath(startCell, m_DestCell) };
+        auto floatPath{ m_Astar.ConvertToFloatPath(cellPath) };
+        m_Agent.SetPath(floatPath);
+    }
 }
 
 void Scene::Draw() const
 {
-    ClearBackground(RAYWHITE);
+    ClearBackground(DARKBLUE);
     m_Grid.Draw();
     m_Agent.Draw();
+
+    if (m_DestCell != nullptr)
+    {
+        auto cellCenter{ m_Grid.GetCellCenter(*m_DestCell) };
+
+        DrawCircle(
+            cellCenter.x,
+            cellCenter.y,
+            10.f,
+            RED);
+    }
+
+
 }

@@ -32,7 +32,7 @@ public:
     vec2<int> GetCellCenter(int cellId) const;
     std::vector<Connection*> FindConnectionsFromCell(int cellId);
 
-    void Update();
+    void MouseClicked();
     void Draw() const;
 
     Grid() = default;
