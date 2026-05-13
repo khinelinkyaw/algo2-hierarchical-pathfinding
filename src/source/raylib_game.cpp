@@ -36,8 +36,8 @@ int main(void)
 {
     // Initialization
     //---------------------------------------------------------
+    //SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
     InitWindow(Consts::SCREEN_WIDTH, Consts::SCREEN_HEIGHT, "Hierarchical Pathfinding");
-
     InitAudioDevice();      // Initialize audio device
 
     // Load global data (assets that must be available in all screens, i.e. font)
@@ -48,7 +48,7 @@ int main(void)
     SetMusicVolume(music, 1.0f);
     PlayMusicStream(music);
 
-    scene.SetGrid(Grid{ 10,20 });
+    scene.SetGrid(Grid{ 10, 10, 0, 0, Consts::SCREEN_WIDTH, Consts::SCREEN_HEIGHT - 100 });
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);

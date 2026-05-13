@@ -20,6 +20,7 @@ public:
     CellType GetCellType() const;
     void SetCellType(CellType cellType);
 
+    Cell() = default;
     Cell(int id, CellType cellType);
 };
 

@@ -3,8 +3,8 @@
 
 namespace Consts
 {
-    int constexpr SCREEN_WIDTH{ 2000 };
-    int constexpr SCREEN_HEIGHT{ 1200 };
+    int constexpr SCREEN_WIDTH{ 1600 };
+    int constexpr SCREEN_HEIGHT{ 900 };
 }
 
 #endif

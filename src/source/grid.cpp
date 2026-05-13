@@ -3,35 +3,26 @@
 #include <structs.h>
 
 #include <raylib.h>
-#include <raygui.h>
 
-#include <algorithm>
 #include <cmath>
 #include <connection.h>
 #include <vector>
-#include <string>
 
 Cell* Grid::GetCell(int cellId)
 {
-    auto iter{ std::ranges::find_if(m_Cells, [cellId](Cell const& cell)
+    return m_Cells.FindCell([cellId](Cell const& cell)
     {
         return cell.GetId() == cellId;
-    })};
-
-    if (iter != m_Cells.end())
-    {
-        return &*iter;
-    }
-    return nullptr;
+    });
 }
 
 Cell* Grid::GetCell(int rowIndex, int colIndex)
 {
-    int cellIndex{ (rowIndex * m_Cols) + colIndex };
+    int cellIndex{ (rowIndex * m_Cells.GetColSize()) + colIndex };
 
-    if (cellIndex < m_Cols * m_Rows)
+    if (cellIndex < m_Cells.GetSize())
     {
-        return &m_Cells[cellIndex];
+        return &m_Cells.GetCellRef(cellIndex);
     }
     return nullptr;
 }
@@ -43,6 +34,17 @@ Cell* Grid::GetCell(float worldX, float worldY)
     return GetCell(rowIndex, colIndex);
 }
 
+std::vector<Cell*> Grid::GetCellsInRegion(Rectangle const& region)
+{
+    region;
+    std::vector<Cell*> result{};
+    //auto topLeftCell{ GetCell(region.x, region.y) };
+
+
+
+    return result;
+}
+
 vec2<int> Grid::GetCellCenter(Cell const& cell) const
 {
     int cellId{ cell.GetId() };
@@ -52,8 +54,8 @@ vec2<int> Grid::GetCellCenter(Cell const& cell) const
 
 vec2<int> Grid::GetCellCenter(int cellId) const
 {
-    int cellCol{ cellId % m_Cols };
-    int cellRow{ static_cast<int>(cellId / m_Cols) };
+    int cellCol{ cellId % m_Cells.GetColSize() };
+    int cellRow{ static_cast<int>(cellId / m_Cells.GetColSize()) };
 
     return vec2<int>(
         static_cast<int>(m_Position.x + ((cellCol * m_CellWidth) + m_CellWidth / 2.f)),
@@ -116,16 +118,16 @@ void Grid::MouseClicked()
     {
         auto [mouseGridX, mouseGridY] { ConvertWorldToCellIndex(mousePos.x, mousePos.y) };
 
-        int cellIndex{ (mouseGridY * m_Cols) + mouseGridX };
-        CellType currentCellType{ m_Cells[cellIndex].GetCellType()};
+        int cellIndex{ (mouseGridY * m_Cells.GetColSize()) + mouseGridX };
+        CellType currentCellType{ m_Cells.GetCell(cellIndex).GetCellType()};
 
         switch (currentCellType)
         {
         case CellType::Empty:
-            m_Cells[cellIndex].SetCellType(CellType::Obstacle);
+            m_Cells.GetCell(cellIndex).SetCellType(CellType::Obstacle);
             break;
         case CellType::Obstacle:
-            m_Cells[cellIndex].SetCellType(CellType::Empty);
+            m_Cells.GetCell(cellIndex).SetCellType(CellType::Empty);
             break;
         }
 
@@ -135,12 +137,12 @@ void Grid::MouseClicked()
 
 void Grid::Draw() const
 {
-    for (int index{ 0 }; index < static_cast<int>(m_Cells.size()); ++index)
+    for (int index{ 0 }; index < static_cast<int>(m_Cells.GetSize()); ++index)
     {
-        int cellRow{ static_cast<int>(index / m_Cols) };
-        int cellCol{ index % m_Cols };
+        int cellRow{ static_cast<int>(index / m_Cells.GetColSize()) };
+        int cellCol{ index % m_Cells.GetColSize() };
 
-        if (m_Cells[index].GetCellType() == CellType::Obstacle)
+        if (m_Cells.GetCell(index).GetCellType() == CellType::Obstacle)
         {
             DrawRectangle(
                 m_Position.x + (cellCol * m_CellWidth),
@@ -151,17 +153,17 @@ void Grid::Draw() const
             );
         }
 
-        Rectangle targetRect{
-            static_cast<float>(m_Position.x + (cellCol * m_CellWidth)),
-            static_cast<float>(m_Position.y + (cellRow * m_CellHeight)),
-            static_cast<float>(m_CellWidth),
-            static_cast<float>(m_CellHeight),
-        };
+        //Rectangle targetRect{
+        //    static_cast<float>(m_Position.x + (cellCol * m_CellWidth)),
+        //    static_cast<float>(m_Position.y + (cellRow * m_CellHeight)),
+        //    static_cast<float>(m_CellWidth),
+        //    static_cast<float>(m_CellHeight),
+        //};
 
-        GuiLabel(targetRect, std::to_string(index).c_str());
+        //GuiLabel(targetRect, std::to_string(index).c_str());
     }
 
-    for (int index{ 0 }; index < m_Rows; ++index)
+    for (int index{ 0 }; index < m_Cells.GetRowSize(); ++index)
     {
         vec2 startPos{m_Position.x, m_Position.y + (index * m_CellHeight)};
         vec2 endPos{m_Position.x + m_Dimensions.x, m_Position.y + (index * m_CellHeight)};
@@ -174,7 +176,7 @@ void Grid::Draw() const
         );
     }
 
-    for (int index{ 0 }; index < m_Cols; ++index)
+    for (int index{ 0 }; index < m_Cells.GetColSize(); ++index)
     {
         vec2 startPos{ m_Position.x + (index * m_CellWidth), m_Position.y };
         vec2 endPos{ m_Position.x + (index * m_CellWidth), m_Position.y + m_Dimensions.y };
@@ -187,49 +189,55 @@ void Grid::Draw() const
         );
     }
 
-    for (auto const& cell : m_Cells)
-    {
-        auto cellCenter{ GetCellCenter(cell) };
+    //for (auto const& cell : m_Cells)
+    //{
+    //    auto cellCenter{ GetCellCenter(cell) };
 
-        DrawCircle(
-            cellCenter.x,
-            cellCenter.y,
-            5.f,
-            ORANGE
-        );
-    }
+    //    DrawCircle(
+    //        cellCenter.x,
+    //        cellCenter.y,
+    //        5.f,
+    //        ORANGE
+    //    );
+    //}
 
-    for (auto const& connection : m_Connections)
-    {
-        auto [cellAId, cellBId] { connection.GetConnectedCells() };
+    //for (auto const& connection : m_Connections)
+    //{
+    //    auto [cellAId, cellBId] { connection.GetConnectedCells() };
 
-        auto cellACenter{ GetCellCenter(cellAId) };
-        auto cellBCenter{ GetCellCenter(cellBId) };
+    //    auto cellACenter{ GetCellCenter(cellAId) };
+    //    auto cellBCenter{ GetCellCenter(cellBId) };
 
-        DrawLine(
-            cellACenter.x,
-            cellACenter.y,
-            cellBCenter.x,
-            cellBCenter.y,
-            ORANGE
-        );
-    }
+    //    DrawLine(
+    //        cellACenter.x,
+    //        cellACenter.y,
+    //        cellBCenter.x,
+    //        cellBCenter.y,
+    //        ORANGE
+    //    );
+    //}
 }
-
+ 
 Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)
-    : m_Rows{rows}
-    , m_Cols{cols}
-    , m_Dimensions{width, height}
-    , m_CellWidth{ m_Dimensions.x / m_Cols }
-    , m_CellHeight{ m_Dimensions.y / m_Rows }
+    //: m_Rows{rows}
+    //, m_Cols{cols}
+    : m_Dimensions{width, height}
+    , m_CellWidth{ m_Dimensions.x / cols }
+    , m_CellHeight{ m_Dimensions.y / rows }
+    , m_Cells{ rows, cols }
     , m_Position{posX, posY}
 {
-    int totalCells{ rows * cols };
-    m_Cells.reserve(totalCells);
+    //int totalCells{ rows * cols };
+    //m_Cells.reserve(totalCells);
 
-    for (int index{ 0 }; index < totalCells; ++index)
+    //for (int index{ 0 }; index < totalCells; ++index)
+    //{
+    //    m_Cells.emplace_back(index, CellType::Empty);
+    //}
+
+    for (int index{ 0 }; index < m_Cells.GetSize(); ++index)
     {
-        m_Cells.emplace_back(index, CellType::Empty);
+        m_Cells.SetCell(index, Cell{index, CellType::Empty});
     }
 
     GenerationConnections();
@@ -239,23 +247,23 @@ void Grid::GenerationConnections()
 {
     m_Connections.clear();
 
-    for (int index{ 0 }; index < m_Cells.size(); ++index)
+    for (int index{ 0 }; index < m_Cells.GetSize(); ++index)
     {
-        if (index - 1 >= 0 and index % m_Cols != 0)
+        if (index - 1 >= 0 and index % m_Cells.GetColSize() != 0)
         {
             CreateNewConnection(index, index - 1);
         }
-        if (index - m_Cols >= 0)
+        if (index - m_Cells.GetColSize() >= 0)
         {
-            CreateNewConnection(index, index - m_Cols);
+            CreateNewConnection(index, index - m_Cells.GetColSize());
         }
-        if (index + 1 < m_Cells.size() and (index + 1) % m_Cols != 0)
+        if (index + 1 < m_Cells.GetSize() and (index + 1) % m_Cells.GetColSize() != 0)
         {
             CreateNewConnection(index, index + 1);
         }
-        if (index + m_Cols < m_Cells.size())
+        if (index + m_Cells.GetColSize() < m_Cells.GetSize())
         {
-            CreateNewConnection(index, index + m_Cols);
+            CreateNewConnection(index, index + m_Cells.GetColSize());
         }
     }
 }

@@ -1,22 +1,26 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include <structs.h>
-#include <constants.h>
 #include <cell.h>
 #include <connection.h>
+#include <constants.h>
+#include <structs.h>
+#include <matrix.h>
+
+#include <raylib.h>
 
 #include <vector>
 
 class Grid final
 {
 private:
-    int m_Rows{};
-    int m_Cols{};
+    //int m_Rows{};
+    //int m_Cols{};
     vec2<int> m_Dimensions{};
     int m_CellWidth{};
     int m_CellHeight{};
-    std::vector<Cell> m_Cells{};
+    //std::vector<Cell> m_Cells{};
+    MyMatrix<Cell> m_Cells{ 0, 0 };
     std::vector<Connection> m_Connections{};
     vec2<int> m_Position{};
 
@@ -27,6 +31,7 @@ public:
     Cell* GetCell(int cellId);
     Cell* GetCell(int rowIndex, int colIndex);
     Cell* GetCell(float worldX, float worldY);
+    std::vector<Cell*> GetCellsInRegion(Rectangle const& region);
 
     vec2<int> GetCellCenter(Cell const& cell) const;
     vec2<int> GetCellCenter(int cellId) const;
