@@ -6,7 +6,7 @@
 
 // Code from Game AI Pathfinding assignment
 
-namespace HeuristicFunctions
+namespace HP::HeuristicFunctions
 {
 	typedef float(*Heuristic)(float, float);
 

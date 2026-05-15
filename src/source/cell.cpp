@@ -1,5 +1,7 @@
 #include <cell.h>
 
+using namespace HP;
+
 int Cell::GetId() const
 {
     return m_Id;

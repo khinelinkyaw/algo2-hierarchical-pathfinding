@@ -9,42 +9,45 @@
 #include <structs.h>
 #include <vector>
 
-class AStar final
+namespace HP
 {
-public:
-	struct CellRecord
+	class AStar final
 	{
-		Cell* pCell = nullptr;
-		Connection* pConnection = nullptr;
-		float costSoFar = 0.f; // accumulated g-costs of all the connections leading up to this one
-		float estimatedTotalCost = 0.f; // f-cost (= costSoFar + h-cost)
-
-		bool operator==(const CellRecord& other) const
+	public:
+		struct CellRecord
 		{
-			return pCell == other.pCell
-				&& pConnection == other.pConnection
-				&& costSoFar == other.costSoFar
-				&& estimatedTotalCost == other.estimatedTotalCost;
+			Cell* pCell = nullptr;
+			Connection* pConnection = nullptr;
+			float costSoFar = 0.f; // accumulated g-costs of all the connections leading up to this one
+			float estimatedTotalCost = 0.f; // f-cost (= costSoFar + h-cost)
+
+			bool operator==(const CellRecord& other) const
+			{
+				return pCell == other.pCell
+					&& pConnection == other.pConnection
+					&& costSoFar == other.costSoFar
+					&& estimatedTotalCost == other.estimatedTotalCost;
+			};
+
+			bool operator<(const CellRecord& other) const
+			{
+				return estimatedTotalCost < other.estimatedTotalCost;
+			};
 		};
 
-		bool operator<(const CellRecord& other) const
-		{
-			return estimatedTotalCost < other.estimatedTotalCost;
-		};
+	private:
+		HeuristicFunctions::Heuristic m_HeuristicFunction;
+		Grid* m_Grid;
+
+		float GetHeuristicCost(Cell const& startCell, Cell const& endCell) const;
+		std::vector<Cell*> BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord);
+
+	public:
+		void SetGrid(Grid* grid) { m_Grid = grid; }
+		std::vector<vec2<float>> ConvertToFloatPath(std::vector<Cell*> const& cellPath);
+
+		std::vector<Cell*> FindPath(Cell* const pStartCell, Cell* const pDestCell);
 	};
-
-private:
-	HeuristicFunctions::Heuristic m_HeuristicFunction;
-	Grid* m_Grid;
-
-	float GetHeuristicCost(Cell const& startCell, Cell const& endCell) const;
-	std::vector<Cell*> BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord);
-
-public:
-	void SetGrid(Grid* grid) { m_Grid = grid; }
-	std::vector<vec2<float>> ConvertToFloatPath(std::vector<Cell*> const& cellPath);
-
-	std::vector<Cell*> FindPath(Cell* const pStartCell, Cell* const pDestCell);
-};
+}
 
 #endif

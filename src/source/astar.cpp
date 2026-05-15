@@ -7,6 +7,8 @@
 //#include <pathfinding/heuristics.h>
 #include <vector>
 
+using namespace HP;
+
 float AStar::GetHeuristicCost(Cell const& startCell, Cell const& endCell) const
 {
 	auto toDest{

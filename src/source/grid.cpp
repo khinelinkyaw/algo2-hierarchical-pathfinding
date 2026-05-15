@@ -8,6 +8,8 @@
 #include <connection.h>
 #include <vector>
 
+using namespace HP;
+
 Cell* Grid::GetCell(int cellId)
 {
     return m_Cells.FindCell([cellId](Cell const& cell)

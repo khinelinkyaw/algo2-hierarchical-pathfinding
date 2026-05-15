@@ -6,6 +6,8 @@
 #include <iterator>
 #include <vector>
  
+using namespace HP;
+
 void Agent::SetPath(std::vector<vec2<float>> const& path)
 {
     m_Path = path;

@@ -6,13 +6,15 @@
 
 #include <raylib.h>
 
-class SearchSpace final
+namespace HP
 {
-private:
-    Grid* m_pGrid{};
-    MyMatrix<Cell*> m_Blocks{};
-    Rectangle m_BoundingBox{};
-
-};
+    class SearchSpace final
+    {
+    private:
+        Grid* m_pGrid{};
+        MyMatrix<Cell*> m_Blocks{};
+        Rectangle m_BoundingBox{};
+    };
+}
 
 #endif

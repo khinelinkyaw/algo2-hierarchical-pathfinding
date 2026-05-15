@@ -4,6 +4,8 @@
 #include <raylib.h>
 #include <utility>
 
+using namespace HP;
+
 void Scene::SetGrid(Grid const& grid)
 {
     m_Grid = grid;

@@ -25,9 +25,9 @@
 #endif
 
 Font font{ 0 };
-Music music { 0 };
-Sound fxCoin { 0 };
-Scene scene{};
+Music music{ 0 };
+Sound fxCoin{ 0 };
+HP::Scene scene{};
 bool showMessageBox{};
 
 static void UpdateDrawFrame(void);          // Update and draw one frame
@@ -37,7 +37,7 @@ int main(void)
     // Initialization
     //---------------------------------------------------------
     //SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
-    InitWindow(Consts::SCREEN_WIDTH, Consts::SCREEN_HEIGHT, "Hierarchical Pathfinding");
+    InitWindow(HP::Consts::SCREEN_WIDTH, HP::Consts::SCREEN_HEIGHT, "Hierarchical Pathfinding");
     InitAudioDevice();      // Initialize audio device
 
     // Load global data (assets that must be available in all screens, i.e. font)
@@ -48,7 +48,7 @@ int main(void)
     SetMusicVolume(music, 1.0f);
     PlayMusicStream(music);
 
-    scene.SetGrid(Grid{ 10, 10, 0, 0, Consts::SCREEN_WIDTH, Consts::SCREEN_HEIGHT - 100 });
+    scene.SetGrid(HP::Grid{ 10, 10, 0, 0, HP::Consts::SCREEN_WIDTH, HP::Consts::SCREEN_HEIGHT - 100 });
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);

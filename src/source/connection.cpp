@@ -2,6 +2,8 @@
 #include <connection.h>
 #include <utility>
 
+using namespace HP;
+
 std::pair<int, int> Connection::GetConnectedCells() const
 {
     return std::pair<int, int>{m_FromCell, m_ToCell};
