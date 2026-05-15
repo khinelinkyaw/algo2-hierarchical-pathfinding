@@ -34,16 +34,6 @@ Cell* Grid::GetCell(float worldX, float worldY)
     return GetCell(rowIndex, colIndex);
 }
 
-std::vector<Cell*> Grid::GetCellsInRegion(Rectangle const& region)
-{
-    region;
-    std::vector<Cell*> result{};
-    //auto topLeftCell{ GetCell(region.x, region.y) };
-
-
-
-    return result;
-}
 
 vec2<int> Grid::GetCellCenter(Cell const& cell) const
 {
@@ -101,6 +91,22 @@ vec2<int> Grid::ConvertWorldToCellIndex(float worldX, float worldY) const
         static_cast<int>(floor((worldX - m_Position.x) / m_CellWidth)),
         static_cast<int>(floor((worldY - m_Position.y) / m_CellHeight))
     );
+}
+
+void Grid::SubdivideCellsIntoRegions()
+{
+    m_CellRegions.clear();
+
+    float numRegionsX{ std::ceil(static_cast<float>(m_Cells.GetColSize()) / REGION_SIZE) };
+    float numRegionsY{ std::ceil(static_cast<float>(m_Cells.GetRowSize()) / REGION_SIZE) };
+
+    for (int regionY{ 0 }; regionY < numRegionsY; ++regionY)
+    {
+        for (int regionX{ 0 }; regionX < numRegionsX; ++regionX)
+        {
+            m_CellRegions.push_back(m_Cells.GetSubMatrix(regionX * REGION_SIZE, regionY * REGION_SIZE, REGION_SIZE, REGION_SIZE));
+        }
+    }
 }
 
 void Grid::MouseClicked()
@@ -189,6 +195,29 @@ void Grid::Draw() const
         );
     }
 
+    for (auto const& region : m_CellRegions)
+    {
+        auto topLeftCell{ region.GetCell(0, 0) };
+        auto bottomRightCell{ region.GetCell(region.GetRowSize() - 1, region.GetColSize() - 1) };
+
+        if (topLeftCell == nullptr or bottomRightCell == nullptr)
+        {
+            continue;
+        }
+
+        auto topLeftPos{ GetCellCenter(topLeftCell->GetId()) };
+        auto bottomRightPos{ GetCellCenter(bottomRightCell->GetId()) };
+
+        Rectangle targetRect{
+            static_cast<float>(topLeftPos.x - m_CellWidth / 2.f) + DRAW_MARGIN,
+            static_cast<float>(topLeftPos.y - m_CellHeight / 2.f) + DRAW_MARGIN,
+            static_cast<float>((bottomRightPos.x - topLeftPos.x) + m_CellWidth) - (DRAW_MARGIN * 2.f),
+            static_cast<float>((bottomRightPos.y - topLeftPos.y) + m_CellHeight) - (DRAW_MARGIN * 2.f),
+        };
+
+        DrawRectangleLinesEx(targetRect, 2.f, ORANGE);
+    }
+
     //for (auto const& cell : m_Cells)
     //{
     //    auto cellCenter{ GetCellCenter(cell) };
@@ -241,6 +270,7 @@ Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)
     }
 
     GenerationConnections();
+    SubdivideCellsIntoRegions();
 }
 
 void Grid::GenerationConnections()

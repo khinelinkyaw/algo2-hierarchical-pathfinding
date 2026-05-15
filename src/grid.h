@@ -14,24 +14,25 @@
 class Grid final
 {
 private:
-    //int m_Rows{};
-    //int m_Cols{};
+    static int constexpr REGION_SIZE{ 4 };
+    static float constexpr DRAW_MARGIN{ 15.f };
+    
     vec2<int> m_Dimensions{};
     int m_CellWidth{};
     int m_CellHeight{};
-    //std::vector<Cell> m_Cells{};
     MyMatrix<Cell> m_Cells{ 0, 0 };
+    std::vector<MyMatrix<Cell*>> m_CellRegions{};
     std::vector<Connection> m_Connections{};
     vec2<int> m_Position{};
 
     void CreateNewConnection(int cellAId, int cellBId);
     vec2<int> ConvertWorldToCellIndex(float worldX, float worldY) const;
+    void SubdivideCellsIntoRegions();
 
 public:
     Cell* GetCell(int cellId);
     Cell* GetCell(int rowIndex, int colIndex);
     Cell* GetCell(float worldX, float worldY);
-    std::vector<Cell*> GetCellsInRegion(Rectangle const& region);
 
     vec2<int> GetCellCenter(Cell const& cell) const;
     vec2<int> GetCellCenter(int cellId) const;

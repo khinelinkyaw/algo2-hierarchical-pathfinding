@@ -135,21 +135,31 @@ public:
         return m_Rows * m_Cols;
     }
 
-    MyMatrix<T*> GetSubMatrix(int startRow, int startCol, int numRows, int numCols) const
+    MyMatrix<T*> GetSubMatrix(int startRow, int startCol, int numRows, int numCols)
     {
         if (startRow < m_Rows and startCol < m_Cols)
         {
-            MyMatrix<T*> result(numRows, numCols);
-            for (int row{ startRow }; row < startRow + numRows and row < m_Rows; ++row)
+            if (startRow + numRows > m_Rows)
             {
-                for (int col{ startCol }; col < startCol + numCols and col < m_Cols; ++col)
+                numRows = m_Rows - startRow;
+            }
+            
+            if (startCol + numCols > m_Cols)
+            {
+                numCols = m_Cols - startCol;
+            }
+
+            MyMatrix<T*> result(numRows, numCols);
+            for (int row{ startRow }; row < startRow + numRows; ++row)
+            {
+                for (int col{ startCol }; col < startCol + numCols; ++col)
                 {
                     result.SetCell(row - startRow, col - startCol, &m_Data[(row * m_Cols) + col]);
                 }
             }
             return result;
         }
-        return {};
+        return MyMatrix<T*>{0,0};
     }
 };
 
