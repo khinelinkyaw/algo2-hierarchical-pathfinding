@@ -10,32 +10,17 @@
 
 using namespace HP;
 
-Cell* Grid::GetCell(int cellId)
+Cell* HP::Grid::GetCell(int cellId)
 {
-    return m_Cells.FindCell([cellId](Cell const& cell)
-    {
-        return cell.GetId() == cellId;
-    });
-}
-
-Cell* Grid::GetCell(int rowIndex, int colIndex)
-{
-    int cellIndex{ (rowIndex * m_Cells.GetColSize()) + colIndex };
-
-    if (cellIndex < m_Cells.GetSize())
-    {
-        return &m_Cells.GetCellRef(cellIndex);
-    }
-    return nullptr;
+    return m_Cells.GetCellPtr(cellId);
 }
 
 Cell* Grid::GetCell(float worldX, float worldY)
 {
     auto [colIndex, rowIndex] { ConvertWorldToCellIndex(worldX, worldY) };
 
-    return GetCell(rowIndex, colIndex);
+    return m_Cells.GetCellPtr(rowIndex, colIndex);
 }
-
 
 vec2<int> Grid::GetCellCenter(Cell const& cell) const
 {
@@ -71,8 +56,8 @@ std::vector<Connection*> Grid::FindConnectionsFromCell(int cellId)
 
 void Grid::CreateNewConnection(int cellAId, int cellBId)
 {
-    auto cellA{ GetCell(cellAId) };
-    auto cellB{ GetCell(cellBId) };
+    auto cellA{ m_Cells.GetCellPtr(cellAId) };
+    auto cellB{ m_Cells.GetCellPtr(cellBId) };
 
     if (cellA == nullptr or cellB == nullptr)
     {

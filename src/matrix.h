@@ -7,7 +7,7 @@
 namespace HP
 {
     template<typename T>
-    class MyMatrix final
+    class Matrix final
     {
     private:
         int m_Rows{};
@@ -15,7 +15,7 @@ namespace HP
         std::vector<T> m_Data{};
 
     public:
-        MyMatrix(int rows, int cols)
+        Matrix(int rows, int cols)
             : m_Rows{ rows }
             , m_Cols{ cols }
             , m_Data(rows* cols)
@@ -47,7 +47,7 @@ namespace HP
             return T{};
         }
 
-        T& GetCellRef(int row, int col)
+        T& GetCell(int row, int col)
         {
             if (row < m_Rows and col < m_Cols)
             {
@@ -56,13 +56,31 @@ namespace HP
             throw std::out_of_range("Cell index out of range");
         }
 
-        T& GetCellRef(int index)
+        T& GetCell(int index)
         {
             if (index < m_Rows * m_Cols)
             {
                 return m_Data[index];
             }
             throw std::out_of_range("Cell index out of range");
+        }
+
+        T* GetCellPtr(int row, int col)
+        {
+            if (row < m_Rows and col < m_Cols)
+            {
+                return &m_Data[(row * m_Cols) + col];
+            }
+            return nullptr;
+        }
+
+        T* GetCellPtr(int index)
+        {
+            if (index < m_Rows * m_Cols)
+            {
+                return &m_Data[index];
+            }
+            return nullptr;
         }
 
         void SetCell(int row, int col, T const& value)
@@ -137,7 +155,7 @@ namespace HP
             return m_Rows * m_Cols;
         }
 
-        MyMatrix<T*> GetSubMatrix(int startRow, int startCol, int numRows, int numCols)
+        Matrix<T*> GetSubMatrix(int startRow, int startCol, int numRows, int numCols)
         {
             if (startRow < m_Rows and startCol < m_Cols)
             {
@@ -151,7 +169,7 @@ namespace HP
                     numCols = m_Cols - startCol;
                 }
 
-                MyMatrix<T*> result(numRows, numCols);
+                Matrix<T*> result(numRows, numCols);
                 for (int row{ startRow }; row < startRow + numRows; ++row)
                 {
                     for (int col{ startCol }; col < startCol + numCols; ++col)
@@ -161,7 +179,7 @@ namespace HP
                 }
                 return result;
             }
-            return MyMatrix<T*>{0, 0};
+            return Matrix<T*>{0, 0};
         }
     };
 }

@@ -22,8 +22,8 @@ namespace HP
         vec2<int> m_Dimensions{};
         int m_CellWidth{};
         int m_CellHeight{};
-        MyMatrix<Cell> m_Cells{ 0, 0 };
-        std::vector<MyMatrix<Cell*>> m_CellRegions{};
+        Matrix<Cell> m_Cells{ 0, 0 };
+        std::vector<Matrix<Cell*>> m_CellRegions{};
         std::vector<Connection> m_Connections{};
         vec2<int> m_Position{};
 
@@ -33,7 +33,6 @@ namespace HP
 
     public:
         Cell* GetCell(int cellId);
-        Cell* GetCell(int rowIndex, int colIndex);
         Cell* GetCell(float worldX, float worldY);
 
         vec2<int> GetCellCenter(Cell const& cell) const;

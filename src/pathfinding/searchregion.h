@@ -12,7 +12,7 @@ namespace HP
     {
     private:
         Grid* m_pGrid{};
-        MyMatrix<Cell*> m_Blocks{};
+        Matrix<Cell*> m_Blocks{};
         Rectangle m_BoundingBox{};
     };
 }
