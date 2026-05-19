@@ -161,15 +161,6 @@ void HP::AbstractGraph::BuildInterRegion()
 
             auto commonCells{ m_pHGrid->GetCellsFromConnections(commonConnections) };
 
-            for (auto conn : commonConnections)
-            {
-                auto iter{ std::ranges::find(m_Connections, *conn) };
-
-                if (iter != m_Connections.end()) continue;
-
-                CreateConnection(conn->GetFromCell(), conn->GetToCell());
-            }
-
             for (auto cell : commonCells)
             {
                 auto iter{ std::ranges::find(m_Cells, cell) };
@@ -178,6 +169,16 @@ void HP::AbstractGraph::BuildInterRegion()
                 {
                     m_Cells.push_back(cell);
                 }
+            }
+
+            for (auto conn : commonConnections)
+            {
+                auto iter{ std::ranges::find(m_Connections, *conn) };
+
+                if (iter != m_Connections.end()) continue;
+
+                CreateConnection(
+                    conn->GetFromCell(), conn->GetToCell());
             }
         }
     }
