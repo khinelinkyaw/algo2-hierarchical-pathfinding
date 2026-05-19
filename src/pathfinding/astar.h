@@ -3,8 +3,9 @@
 
 #include <cell.h>
 #include <connection.h>
-#include <graph/grid.h>
+#include <graph/graph.h>
 #include <pathfinding/heuristics.h>
+#include <graph/grid.h>
 
 #include <structs.h>
 #include <vector>
@@ -41,10 +42,10 @@ namespace HP
 		static void BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord, std::vector<Cell*>& finalPath);
 
 	public:
-		static float GetHeuristicCost(Cell const& startCell, Cell const& endCell, Grid* pGrid);
-        static float GetHeuristicCost(int startCellId, int endCellId, Grid* pGrid);
+		static float GetHeuristicCost(Cell const& startCell, Cell const& endCell, Graph* pGraph);
+        static float GetHeuristicCost(int startCellId, int endCellId, Graph* pGraph);
 		static std::vector<vec2<float>> ConvertToFloatPath(std::vector<Cell*> const& cellPath, Grid* pGrid);
-		static float FindPath(Cell* const pStartCell, Cell* const pDestCell, Grid* pGrid, std::vector<Cell*>* finalPath);
+		static float FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGraph, std::vector<Cell*>* finalPath);
 	};
 }
 

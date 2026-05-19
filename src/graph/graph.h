@@ -3,6 +3,7 @@
 
 #include <cell.h>
 #include <connection.h>
+#include <structs.h>
 
 #include <vector>
 
@@ -18,8 +19,10 @@ namespace HP
         virtual void CreateConnection(int cellAId, int cellBId) = 0;
         virtual void CreateConnection(Cell* cellA, Cell* cellB) = 0;
 
-        virtual std::vector<Cell>& GetCells() = 0;
         virtual Cell* GetCell(int cellId) = 0;
+        virtual vec2<int> GetCellPosition(int cellId) const = 0;
+
+        virtual ~Graph() = default;
     };
 }
 

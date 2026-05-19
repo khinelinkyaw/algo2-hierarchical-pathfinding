@@ -15,7 +15,7 @@ namespace HP
         static int constexpr INVALID_CELL_ID{ -1 };
     private:
         int m_Id{ INVALID_CELL_ID };
-        int m_RegionId{ INVALID_CELL_ID };
+        int m_RegionId{ 0 };
         CellType m_CellType{ CellType::Empty };
 
     public:

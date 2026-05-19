@@ -1,23 +1,23 @@
 #include <cell.h>
 #include <pathfinding/astar.h>
 #include <structs.h>
+#include <graph/grid.h>
+#include <graph/graph.h>
 
 #include <algorithm>
-#include <cstdlib>
-#include <graph/grid.h>
 #include <vector>
 
 using namespace HP;
 
-float AStar::GetHeuristicCost(Cell const& startCell, Cell const& endCell, Grid* pGrid)
+float AStar::GetHeuristicCost(Cell const& startCell, Cell const& endCell, Graph* pGraph)
 {
-    return GetHeuristicCost(startCell.GetId(), endCell.GetId(), pGrid);
+    return GetHeuristicCost(startCell.GetId(), endCell.GetId(), pGraph);
 }
 
-float HP::AStar::GetHeuristicCost(int startCellId, int endCellId, Grid* pGrid)
+float HP::AStar::GetHeuristicCost(int startCellId, int endCellId, Graph* pGraph)
 {
 	auto toDest{
-		pGrid->GetCellPosition(startCellId) - pGrid->GetCellPosition(endCellId)
+		pGraph->GetCellPosition(startCellId) - pGraph->GetCellPosition(endCellId)
 	};
 	return static_cast<float>(abs(static_cast<float>(toDest.x)) + abs(static_cast<float>(toDest.y)));
 }
@@ -59,7 +59,7 @@ std::vector<vec2<float>> AStar::ConvertToFloatPath(std::vector<Cell*> const& cel
 	return floatPath;
 }
 
-float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Grid* pGrid, std::vector<Cell*>* finalPath)
+float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGraph, std::vector<Cell*>* finalPath)
 {
 	float totalCost{};
 	std::vector<CellRecord> OpenList{};
@@ -69,7 +69,7 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Grid* pGrid
 	CurrentNodeRecord.pCell = pStartCell;
 	CurrentNodeRecord.pConnection = nullptr;
 	CurrentNodeRecord.costSoFar = 0.0f;
-	CurrentNodeRecord.estimatedTotalCost = GetHeuristicCost(*pStartCell, *pDestCell, pGrid);
+	CurrentNodeRecord.estimatedTotalCost = GetHeuristicCost(*pStartCell, *pDestCell, pGraph);
 	OpenList.push_back(CurrentNodeRecord);
 
 	CellRecord NeighborCellRecord{};
@@ -92,14 +92,14 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Grid* pGrid
 			break;
 		}
 
-		auto Connections = pGrid->GetConnectionsFromCell(CurrentNodeId);
+		auto Connections = pGraph->GetConnectionsFromCell(CurrentNodeId);
 
 		for (auto Conn : Connections)
 		{
-			NeighborCellRecord.pCell = pGrid->GetCell(Conn->GetToCell());
+			NeighborCellRecord.pCell = pGraph->GetCell(Conn->GetToCell());
 			NeighborCellRecord.pConnection = Conn;
 			NeighborCellRecord.costSoFar = CurrentNodeRecord.costSoFar + Conn->GetWeight();
-			NeighborCellRecord.estimatedTotalCost = NeighborCellRecord.costSoFar + GetHeuristicCost(*(NeighborCellRecord.pCell), *pDestCell, pGrid);
+			NeighborCellRecord.estimatedTotalCost = NeighborCellRecord.costSoFar + GetHeuristicCost(*(NeighborCellRecord.pCell), *pDestCell, pGraph);
 
 			auto OpenListIter = std::ranges::find_if(OpenList, FindNeighborNodeId);
 			auto ClosedListIter = std::ranges::find_if(ClosedList, FindNeighborNodeId);

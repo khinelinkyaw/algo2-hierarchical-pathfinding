@@ -8,7 +8,6 @@
 #include <structs.h>
 #include <graph/graph.h>
 
-#include <set>
 #include <vector>
 
 namespace HP
@@ -26,9 +25,7 @@ namespace HP
         vec2<int> m_Position{};
 
         vec2<int> ConvertWorldToCellIndex(float worldX, float worldY) const;
-        std::vector<Connection*> FindCommonConnections(std::set<Connection*> connectionsA, std::set<Connection*> connectionsB);
-        std::vector<Cell*> GetCellsFromConnections(std::vector<Connection*> connections);
-        std::vector<Connection*> GetConnectionFromCells(std::set<Cell*> const& cells);
+        std::vector<Connection*> GetConnectionFromCells(std::vector<Cell*> const& cells);
 
     public:
         std::vector<Cell*> GetConnectedCells(int cellId) override;
@@ -39,16 +36,23 @@ namespace HP
         void CreateConnection(Cell* cellA, Cell* cellB) override;
 
         std::vector<Cell>& GetCells() { return m_Cells.GetData(); }
-        Cell* GetCell(int cellId) override;
 
+        Cell* GetCell(int cellId) override;
         Cell* GetCell(float worldX, float worldY);
 
         vec2<int> GetCellCenter(Cell const& cell) const;
         vec2<int> GetCellCenter(int cellId) const;
-        vec2<int> GetCellPosition(int cellId) const;
+        vec2<int> GetCellPosition(int cellId) const override;
+
+        std::vector<Connection*> GetExternalConnectionFromRegion(int regionId);
+
+        std::vector<Connection*> FindCommonConnections(std::vector<Connection*> connectionsA, std::vector<Connection*> connectionsB);
+        std::vector<Cell*> GetCellsFromConnections(std::vector<Connection*> connections);
 
         void MouseClicked();
         virtual void Draw() const;
+
+        int GetSize() const { return m_Cells.GetSize(); }
 
         void GenerationConnections();
 

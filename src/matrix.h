@@ -177,6 +177,11 @@ namespace HP
             return m_Data;
         }
 
+        std::vector<T> const& GetData() const
+        {
+            return m_Data;
+        }
+
         Matrix<T*> GetSubMatrix(int startRow, int startCol, int numRows, int numCols)
         {
             if (startRow < m_Rows and startCol < m_Cols)

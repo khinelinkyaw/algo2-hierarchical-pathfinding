@@ -3,14 +3,15 @@
 #include <pathfinding/astar.h>
 #include <structs.h>
 
-#include <raylib.h>
 #include <raygui.h>
+#include <raylib.h>
 
+#include <algorithm>
 #include <cmath>
 #include <connection.h>
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 using namespace HP;
 
@@ -124,7 +125,7 @@ vec2<int> Grid::ConvertWorldToCellIndex(float worldX, float worldY) const
     );
 }
 
-std::vector<Connection*> HP::Grid::FindCommonConnections(std::set<Connection*> connectionsA, std::set<Connection*> connectionsB)
+std::vector<Connection*> HP::Grid::FindCommonConnections(std::vector<Connection*> connectionsA, std::vector<Connection*> connectionsB)
 {
     std::vector<Connection*> result{};
 
@@ -256,34 +257,6 @@ void Grid::Draw() const
             { 200,200,200,100 }
         );
     }
-
-    //for (auto const& cell : m_Cells)
-    //{
-    //    auto cellCenter{ GetCellCenter(cell) };
-
-    //    DrawCircle(
-    //        cellCenter.x,
-    //        cellCenter.y,
-    //        5.f,
-    //        ORANGE
-    //    );
-    //}
-
-    //for (auto const& connection : m_Connections)
-    //{
-    //    auto [cellAId, cellBId] { connection.GetConnectedCells() };
-
-    //    auto cellACenter{ GetCellCenter(cellAId) };
-    //    auto cellBCenter{ GetCellCenter(cellBId) };
-
-    //    DrawLine(
-    //        cellACenter.x,
-    //        cellACenter.y,
-    //        cellBCenter.x,
-    //        cellBCenter.y,
-    //        ORANGE
-    //    );
-    //}
 }
  
 Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)
@@ -324,4 +297,25 @@ void Grid::GenerationConnections()
             CreateConnection(index, index + m_Cells.GetColSize());
         }
     }
+}
+
+std::vector<Connection*> HP::Grid::GetExternalConnectionFromRegion(int regionId)
+{
+    std::vector<Connection*> result{};
+
+    auto cells{ GetCellsFromRegion(regionId) };
+    auto connections{ GetConnectionFromCells(cells) };
+
+    for (auto connection : connections)
+    {
+        auto toCell{ GetCell(connection->GetToCell()) };
+
+        auto toCellIter{ std::ranges::find(cells, toCell) };
+
+        if (toCellIter != cells.end()) continue;
+
+        result.push_back(connection);
+    }
+
+    return result;
 }
