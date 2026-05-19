@@ -13,14 +13,11 @@
 ********************************************************************************************/
 
 #include <constants.h>
-#include <grid.h>
 #include <scene.h>
 
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
-
-#include <memory>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>

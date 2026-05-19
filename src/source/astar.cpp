@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <cstdlib>
-//#include <pathfinding/heuristics.h>
+#include <grid.h>
 #include <vector>
 
 using namespace HP;
