@@ -1,22 +1,24 @@
 #include <grid.h>
 #include <scene.h>
+#include <pathfinding/astar.h>
+#include <cell.h>
+
+#include <raylib.h>
 
 #include <memory>
-#include <raylib.h>
 #include <utility>
+#include <vector>
 
 using namespace HP;
 
 void Scene::SetGrid(Grid const& grid)
 {
     m_Grid = std::make_unique<Grid>(grid);
-    m_Astar.SetGrid(m_Grid.get());
 }
 
 void Scene::SetGrid(std::unique_ptr<Grid>&& grid)
 {
     m_Grid = std::move(grid);
-    m_Astar.SetGrid(m_Grid.get());
 }
 
 void Scene::Update()
@@ -45,8 +47,9 @@ void Scene::RefreshPathForAgent()
 
     if (startCell != nullptr and m_DestCell != nullptr)
     {
-        auto cellPath{ m_Astar.FindPath(startCell, m_DestCell) };
-        auto floatPath{ m_Astar.ConvertToFloatPath(cellPath) };
+        std::vector<Cell*> cellPath{};
+        AStar::FindPath(startCell, m_DestCell, m_Grid.get(), &cellPath);
+        auto floatPath{ AStar::ConvertToFloatPath(cellPath, m_Grid.get()) };
         m_Agent.SetPath(floatPath);
     }
 }
@@ -71,5 +74,4 @@ void Scene::Draw() const
 
 HP::Scene::Scene()
 {
-    m_Astar.SetGrid(m_Grid.get());
 }

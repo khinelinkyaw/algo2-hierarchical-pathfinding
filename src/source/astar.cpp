@@ -9,22 +9,26 @@
 
 using namespace HP;
 
-float AStar::GetHeuristicCost(Cell const& startCell, Cell const& endCell) const
+float AStar::GetHeuristicCost(Cell const& startCell, Cell const& endCell, Grid* pGrid)
+{
+    return GetHeuristicCost(startCell.GetId(), endCell.GetId(), pGrid);
+}
+
+float HP::AStar::GetHeuristicCost(int startCellId, int endCellId, Grid* pGrid)
 {
 	auto toDest{
-		m_Grid->GetCellCenter(startCell) - m_Grid->GetCellCenter(endCell)
+		pGrid->GetCellPosition(startCellId) - pGrid->GetCellPosition(endCellId)
 	};
 	return static_cast<float>(abs(static_cast<float>(toDest.x)) + abs(static_cast<float>(toDest.y)));
 }
 
-std::vector<Cell*> AStar::BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord)
+void AStar::BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord, std::vector<Cell*>& finalPath)
 {
-	std::vector<Cell*> Path{};
 	CellRecord currentCellRecord{ startingCellRecord };
 
 	while (currentCellRecord.pConnection != nullptr)
 	{
-		Path.push_back(currentCellRecord.pCell);
+		finalPath.push_back(currentCellRecord.pCell);
 
 		auto NextNodeIter = std::ranges::find_if(ClosedList, [&currentCellRecord](CellRecord const& Record)
 			{
@@ -34,19 +38,18 @@ std::vector<Cell*> AStar::BacktrackFullPath(std::vector<CellRecord> const& Close
 		currentCellRecord = *NextNodeIter;
 	}
 
-	Path.push_back(currentCellRecord.pCell);
-	std::ranges::reverse(Path);
-	return Path;
+	finalPath.push_back(currentCellRecord.pCell);
+	std::ranges::reverse(finalPath);
 }
 
-std::vector<vec2<float>> AStar::ConvertToFloatPath(std::vector<Cell*> const& cellPath)
+std::vector<vec2<float>> AStar::ConvertToFloatPath(std::vector<Cell*> const& cellPath, Grid* pGrid)
 {
 	std::vector<vec2<float>> floatPath{};
 	floatPath.reserve(cellPath.size());
 
 	for (auto cellPtr : cellPath)
 	{
-		auto cellCenter{ m_Grid->GetCellCenter(*cellPtr) };
+		auto cellCenter{ pGrid->GetCellCenter(*cellPtr) };
 		floatPath.emplace_back(
 			static_cast<float>(cellCenter.x),
 			static_cast<float>(cellCenter.y)
@@ -56,8 +59,9 @@ std::vector<vec2<float>> AStar::ConvertToFloatPath(std::vector<Cell*> const& cel
 	return floatPath;
 }
 
-std::vector<Cell*> AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell)
+float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Grid* pGrid, std::vector<Cell*>* finalPath)
 {
+	float totalCost{};
 	std::vector<CellRecord> OpenList{};
 	std::vector<CellRecord> ClosedList{};
 
@@ -65,7 +69,7 @@ std::vector<Cell*> AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell
 	CurrentNodeRecord.pCell = pStartCell;
 	CurrentNodeRecord.pConnection = nullptr;
 	CurrentNodeRecord.costSoFar = 0.0f;
-	CurrentNodeRecord.estimatedTotalCost = GetHeuristicCost(*pStartCell, *pDestCell);
+	CurrentNodeRecord.estimatedTotalCost = GetHeuristicCost(*pStartCell, *pDestCell, pGrid);
 	OpenList.push_back(CurrentNodeRecord);
 
 	CellRecord NeighborCellRecord{};
@@ -84,17 +88,18 @@ std::vector<Cell*> AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell
 		{
 			ClosedList.push_back(CurrentNodeRecord);
 			OpenList.clear();
+            totalCost = CurrentNodeRecord.estimatedTotalCost;
 			break;
 		}
 
-		auto Connections = m_Grid->FindConnectionsFromCell(CurrentNodeId);
+		auto Connections = pGrid->FindConnectionsFromCell(CurrentNodeId);
 
 		for (auto Conn : Connections)
 		{
-			NeighborCellRecord.pCell = m_Grid->GetCell(Conn->GetToCell());
+			NeighborCellRecord.pCell = pGrid->GetCell(Conn->GetToCell());
 			NeighborCellRecord.pConnection = Conn;
 			NeighborCellRecord.costSoFar = CurrentNodeRecord.costSoFar + Conn->GetWeight();
-			NeighborCellRecord.estimatedTotalCost = NeighborCellRecord.costSoFar + GetHeuristicCost(*(NeighborCellRecord.pCell), *pDestCell);
+			NeighborCellRecord.estimatedTotalCost = NeighborCellRecord.costSoFar + GetHeuristicCost(*(NeighborCellRecord.pCell), *pDestCell, pGrid);
 
 			auto OpenListIter = std::ranges::find_if(OpenList, FindNeighborNodeId);
 			auto ClosedListIter = std::ranges::find_if(ClosedList, FindNeighborNodeId);
@@ -134,5 +139,9 @@ std::vector<Cell*> AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell
 		CurrentNodeRecord = *ClosestNodeIter;
 	}
 
-	return BacktrackFullPath(ClosedList, CurrentNodeRecord);
+	if (finalPath != nullptr)
+	{
+		BacktrackFullPath(ClosedList, CurrentNodeRecord, *finalPath);
+	}
+    return totalCost;
 }

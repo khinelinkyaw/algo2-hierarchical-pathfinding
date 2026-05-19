@@ -14,7 +14,6 @@ namespace HP
     private:
         std::unique_ptr<Grid> m_Grid{ std::make_unique<HierarchicalGrid>(10,10) };
         Agent m_Agent{};
-        AStar m_Astar{};
         Cell* m_DestCell{};
 
     public:

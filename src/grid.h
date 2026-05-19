@@ -15,12 +15,14 @@ namespace HP
 {
     class Grid
     {
+    private:
+        std::vector<Connection> m_Connections{};
+
     protected:
         vec2<int> m_Dimensions{};
         int m_CellWidth{};
         int m_CellHeight{};
         Matrix<Cell> m_Cells{ 0, 0 };
-        std::vector<Connection> m_Connections{};
         vec2<int> m_Position{};
 
         void CreateNewConnection(int cellAId, int cellBId);
@@ -28,13 +30,18 @@ namespace HP
         std::vector<Connection*> FindCommonConnections(std::set<Connection*> connectionsA, std::set<Connection*> connectionsB);
         std::vector<Cell*> GetCellsFromConnections(std::vector<Connection*> connections);
         std::vector<Connection*> GetConnectionFromCells(std::set<Cell*> const& cells);
+        bool CheckTwoCells(int cellAId, int cellBId);
 
     public:
+        std::vector<Cell>& GetCells() { return m_Cells.GetData(); }
+
         Cell* GetCell(int cellId);
         Cell* GetCell(float worldX, float worldY);
 
         vec2<int> GetCellCenter(Cell const& cell) const;
         vec2<int> GetCellCenter(int cellId) const;
+        vec2<int> GetCellPosition(int cellId) const;
+
         std::vector<Connection*> FindConnectionsFromCell(int cellId);
         std::vector<Cell*> FindConnectedCells(int cellId);
 
@@ -60,14 +67,21 @@ namespace HP
         std::vector<Connection> m_AbstractConnections{};
 
         void SubdivideCellsIntoRegions();
-
         void BuildAbstractGraph();
 
+        void BuildAbstractInterRegion();
+
         std::set<Cell*> GetCellsOfRegion(int regionId);
+        std::vector<Cell*> GetAbstractCellsOfRegion(int regionId);
+
+        void SetConnectionsToCell(Cell* cell, std::vector<Cell*> toConnCells);
+        void CreateAbstractConnection(Cell* cellA, Cell* cellB);
+        void CreateAbstractConnection(int cellAId, int cellBId);
         std::set<Connection*> GetExternalConnectionFromRegion(int regionId);
 
     public:
         void Draw() const override;
+        void DrawAbstractConnections() const;
 
         HierarchicalGrid() = default;
         HierarchicalGrid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::SCREEN_HEIGHT);

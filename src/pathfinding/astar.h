@@ -37,16 +37,14 @@ namespace HP
 
 	private:
 		HeuristicFunctions::Heuristic m_HeuristicFunction;
-		Grid* m_Grid;
 
-		float GetHeuristicCost(Cell const& startCell, Cell const& endCell) const;
-		std::vector<Cell*> BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord);
+		static void BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord, std::vector<Cell*>& finalPath);
 
 	public:
-		void SetGrid(Grid* grid) { m_Grid = grid; }
-		std::vector<vec2<float>> ConvertToFloatPath(std::vector<Cell*> const& cellPath);
-
-		std::vector<Cell*> FindPath(Cell* const pStartCell, Cell* const pDestCell);
+		static float GetHeuristicCost(Cell const& startCell, Cell const& endCell, Grid* pGrid);
+        static float GetHeuristicCost(int startCellId, int endCellId, Grid* pGrid);
+		static std::vector<vec2<float>> ConvertToFloatPath(std::vector<Cell*> const& cellPath, Grid* pGrid);
+		static float FindPath(Cell* const pStartCell, Cell* const pDestCell, Grid* pGrid, std::vector<Cell*>* finalPath);
 	};
 }
 

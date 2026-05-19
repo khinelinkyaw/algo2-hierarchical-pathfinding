@@ -17,6 +17,8 @@ namespace HP
         std::pair<int, int> GetConnectedCells() const;
         int GetToCell() const { return m_ToCell; }
         int GetFromCell() const { return m_FromCell; }
+
+        void SetWeight(float weight) { m_Weight = weight; }
         float GetWeight() const { return m_Weight; }
 
         Connection(int fromCell, int toCell);
