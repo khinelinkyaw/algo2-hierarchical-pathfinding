@@ -3,7 +3,7 @@
 
 #include <cell.h>
 #include <connection.h>
-#include <grid.h>
+#include <graph/grid.h>
 #include <matrix.h>
 #include <constants.h>
 
@@ -26,11 +26,11 @@ namespace HP
 
         void SubdivideCellsIntoRegions();
         void BuildAbstractGraph();
-
         void BuildAbstractInterRegion();
+        std::vector<Cell*> GetAbstractCellsOfRegion(int regionId);
+
 
         std::set<Cell*> GetCellsOfRegion(int regionId);
-        std::vector<Cell*> GetAbstractCellsOfRegion(int regionId);
 
         void SetConnectionsToCell(Cell* cell, std::vector<Cell*> toConnCells);
         void CreateAbstractConnection(Cell* cellA, Cell* cellB);

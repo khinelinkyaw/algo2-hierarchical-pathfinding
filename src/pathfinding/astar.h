@@ -3,7 +3,7 @@
 
 #include <cell.h>
 #include <connection.h>
-#include <grid.h>
+#include <graph/grid.h>
 #include <pathfinding/heuristics.h>
 
 #include <structs.h>

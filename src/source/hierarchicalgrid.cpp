@@ -1,7 +1,7 @@
-#include <hierarchicalgrid.h>
+#include <graph/hierarchicalgrid.h>
 
 #include <cell.h>
-#include <grid.h>
+#include <graph/grid.h>
 #include <pathfinding/astar.h>
 #include <structs.h>
 
@@ -69,7 +69,7 @@ void HP::HierarchicalGrid::BuildAbstractInterRegion()
     for (auto& region : m_CellRegions)
     {
         int regionId{ region.first };
-        auto connectedRegions{ m_RegionGrid.FindConnectedCells(regionId) };
+        auto connectedRegions{ m_RegionGrid.GetConnectedCells(regionId) };
 
         auto regionExtConn{ GetExternalConnectionFromRegion(regionId) };
 
@@ -175,7 +175,7 @@ std::vector<Connection*> HP::Grid::GetConnectionFromCells(std::set<Cell*> const&
 
     for (auto cell : cells)
     {
-        auto connections{ FindConnectionsFromCell(cell->GetId()) };
+        auto connections{ GetConnectionsFromCell(cell->GetId()) };
         result.insert(result.end(), connections.begin(), connections.end());
     }
 

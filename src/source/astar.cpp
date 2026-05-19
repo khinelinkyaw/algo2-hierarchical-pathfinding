@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <grid.h>
+#include <graph/grid.h>
 #include <vector>
 
 using namespace HP;
@@ -92,7 +92,7 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Grid* pGrid
 			break;
 		}
 
-		auto Connections = pGrid->FindConnectionsFromCell(CurrentNodeId);
+		auto Connections = pGrid->GetConnectionsFromCell(CurrentNodeId);
 
 		for (auto Conn : Connections)
 		{

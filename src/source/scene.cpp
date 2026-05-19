@@ -1,4 +1,4 @@
-#include <grid.h>
+#include <graph/grid.h>
 #include <scene.h>
 #include <pathfinding/astar.h>
 #include <cell.h>

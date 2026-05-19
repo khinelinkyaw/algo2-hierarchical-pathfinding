@@ -1,10 +1,10 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <grid.h>
+#include <graph/grid.h>
 #include <cell.h>
 #include <agent.h>
-#include <hierarchicalgrid.h>
+#include <graph/hierarchicalgrid.h>
 
 #include <memory>
 

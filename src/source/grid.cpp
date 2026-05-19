@@ -1,5 +1,5 @@
 #include <cell.h>
-#include <grid.h>
+#include <graph/grid.h>
 #include <pathfinding/astar.h>
 #include <structs.h>
 
@@ -51,7 +51,7 @@ vec2<int> HP::Grid::GetCellPosition(int cellId) const
     );
 }
 
-std::vector<Connection*> Grid::FindConnectionsFromCell(int cellId)
+std::vector<Connection*> Grid::GetConnectionsFromCell(int cellId)
 {
     std::vector<Connection*> result{};
 
@@ -65,11 +65,26 @@ std::vector<Connection*> Grid::FindConnectionsFromCell(int cellId)
     return result;
 }
 
-std::vector<Cell*> HP::Grid::FindConnectedCells(int cellId)
+std::vector<Cell*> HP::Grid::GetCellsFromRegion(int regionId)
 {
     std::vector<Cell*> result{};
 
-    auto connections{ FindConnectionsFromCell(cellId) };
+    for (auto& cell : m_Cells.GetData())
+    {
+        if (cell.GetRegionId() == regionId)
+        {
+            result.push_back(&cell);
+        }
+    }
+
+    return result;
+}
+
+std::vector<Cell*> HP::Grid::GetConnectedCells(int cellId)
+{
+    std::vector<Cell*> result{};
+
+    auto connections{ GetConnectionsFromCell(cellId) };
 
     for (auto& connection : connections)
     {
@@ -79,14 +94,26 @@ std::vector<Cell*> HP::Grid::FindConnectedCells(int cellId)
     return result;
 }
 
-void Grid::CreateNewConnection(int cellAId, int cellBId)
+void Grid::CreateConnection(int cellAId, int cellBId)
 {
-    if (CheckTwoCells(cellAId, cellBId))
+    CreateConnection(GetCell(cellAId), GetCell(cellBId));
+}
+
+void HP::Grid::CreateConnection(Cell* cellA, Cell* cellB)
+{
+    if (cellA == nullptr or cellB == nullptr)
     {
-        Connection connection{ cellAId, cellBId };
-        connection.SetWeight(AStar::GetHeuristicCost(cellAId, cellBId, this));
-        m_Connections.push_back(connection);
+        return;
     }
+
+    if (cellA->GetCellType() == CellType::Obstacle or cellB->GetCellType() == CellType::Obstacle)
+    {
+        return;
+    }
+
+    Connection connection{ cellA->GetId(), cellB->GetId() };
+    connection.SetWeight(AStar::GetHeuristicCost(*cellA, *cellB, this));
+    m_Connections.push_back(connection);
 }
 
 vec2<int> Grid::ConvertWorldToCellIndex(float worldX, float worldY) const
@@ -96,25 +123,6 @@ vec2<int> Grid::ConvertWorldToCellIndex(float worldX, float worldY) const
         static_cast<int>(floor((worldY - m_Position.y) / m_CellHeight))
     );
 }
-
-bool HP::Grid::CheckTwoCells(int cellAId, int cellBId)
-{
-    auto cellA{ m_Cells.GetCellPtr(cellAId) };
-    auto cellB{ m_Cells.GetCellPtr(cellBId) };
-
-    if (cellA == nullptr or cellB == nullptr)
-    {
-        return false;
-    }
-
-    if (cellA->GetCellType() == CellType::Obstacle or cellB->GetCellType() == CellType::Obstacle)
-    {
-        return false;
-    }
-
-    return true;
-}
-
 
 std::vector<Connection*> HP::Grid::FindCommonConnections(std::set<Connection*> connectionsA, std::set<Connection*> connectionsB)
 {
@@ -301,19 +309,19 @@ void Grid::GenerationConnections()
     {
         if (index - 1 >= 0 and index % m_Cells.GetColSize() != 0)
         {
-            CreateNewConnection(index, index - 1);
+            CreateConnection(index, index - 1);
         }
         if (index - m_Cells.GetColSize() >= 0)
         {
-            CreateNewConnection(index, index - m_Cells.GetColSize());
+            CreateConnection(index, index - m_Cells.GetColSize());
         }
         if (index + 1 < m_Cells.GetSize() and (index + 1) % m_Cells.GetColSize() != 0)
         {
-            CreateNewConnection(index, index + 1);
+            CreateConnection(index, index + 1);
         }
         if (index + m_Cells.GetColSize() < m_Cells.GetSize())
         {
-            CreateNewConnection(index, index + m_Cells.GetColSize());
+            CreateConnection(index, index + m_Cells.GetColSize());
         }
     }
 }
