@@ -112,32 +112,49 @@ namespace HP
             return nullptr;
         }
 
-        std::vector<T> GetRow(int row) const
+        std::vector<T*> GetRow(int row)
         {
             if (row < m_Rows)
             {
-                std::vector<T> result{};
+                std::vector<T*> result{};
                 for (int col{ 0 }; col < m_Cols; ++col)
                 {
-                    result.push_back(GetCell(row, col));
+                    result.push_back(GetCellPtr(row, col));
                 }
                 return result;
             }
             return {};
         }
 
-        std::vector<T> GetCol(int col) const
+        std::vector<T*> GetCol(int col)
         {
             if (col < m_Cols)
             {
-                std::vector<T> result{};
+                std::vector<T*> result{};
                 for (int row{ 0 }; row < m_Rows; ++row)
                 {
-                    result.push_back(GetCell(row, col));
+                    result.push_back(GetCellPtr(row, col));
                 }
                 return result;
             }
             return {};
+        }
+
+        std::vector<T*> GetBorderCells()
+        {
+            std::vector<T*> result{};
+
+            auto topRow{ GetRow(0) };
+            auto bottomRow{ GetRow(m_Rows - 1) };
+            auto leftCol{ GetCol(0) };
+            auto rightCol{ GetCol(m_Cols - 1) };
+
+            result.insert(result.end(), topRow.begin(), topRow.end());
+            result.insert(result.end(), bottomRow.begin(), bottomRow.end());
+            result.insert(result.end(), ++leftCol.begin(), --leftCol.end());
+            result.insert(result.end(), ++rightCol.begin(), --rightCol.end());
+
+            return result;
         }
 
         int GetRowSize() const
@@ -153,6 +170,11 @@ namespace HP
         int GetSize() const
         {
             return m_Rows * m_Cols;
+        }
+
+        std::vector<T>& GetData()
+        {
+            return m_Data;
         }
 
         Matrix<T*> GetSubMatrix(int startRow, int startCol, int numRows, int numCols)
@@ -174,7 +196,7 @@ namespace HP
                 {
                     for (int col{ startCol }; col < startCol + numCols; ++col)
                     {
-                        result.SetCell(row - startRow, col - startCol, &m_Data[(row * m_Cols) + col]);
+                        result.SetCell(row - startRow, col - startCol, GetCellPtr(row, col));
                     }
                 }
                 return result;

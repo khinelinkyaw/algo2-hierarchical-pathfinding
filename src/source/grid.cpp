@@ -3,10 +3,15 @@
 #include <structs.h>
 
 #include <raylib.h>
+#include <raygui.h>
 
+#include <algorithm>
 #include <cmath>
 #include <connection.h>
+#include <utility>
 #include <vector>
+#include <set>
+#include <string>
 
 using namespace HP;
 
@@ -54,6 +59,20 @@ std::vector<Connection*> Grid::FindConnectionsFromCell(int cellId)
     return result;
 }
 
+std::vector<Cell*> HP::Grid::FindConnectedCells(int cellId)
+{
+    std::vector<Cell*> result{};
+
+    auto connections{ FindConnectionsFromCell(cellId) };
+
+    for (auto& connection : connections)
+    {
+        result.push_back(m_Cells.GetCellPtr(connection->GetToCell()));
+    }
+
+    return result;
+}
+
 void Grid::CreateNewConnection(int cellAId, int cellBId)
 {
     auto cellA{ m_Cells.GetCellPtr(cellAId) };
@@ -80,20 +99,232 @@ vec2<int> Grid::ConvertWorldToCellIndex(float worldX, float worldY) const
     );
 }
 
-void Grid::SubdivideCellsIntoRegions()
+void HierarchicalGrid::SubdivideCellsIntoRegions()
 {
     m_CellRegions.clear();
 
     float numRegionsX{ std::ceil(static_cast<float>(m_Cells.GetColSize()) / REGION_SIZE) };
     float numRegionsY{ std::ceil(static_cast<float>(m_Cells.GetRowSize()) / REGION_SIZE) };
 
+    m_RegionGrid = Grid{ static_cast<int>(numRegionsY), static_cast<int>(numRegionsX)};
+
+    int regionId{ 0 };
     for (int regionY{ 0 }; regionY < numRegionsY; ++regionY)
     {
         for (int regionX{ 0 }; regionX < numRegionsX; ++regionX)
         {
-            m_CellRegions.push_back(m_Cells.GetSubMatrix(regionX * REGION_SIZE, regionY * REGION_SIZE, REGION_SIZE, REGION_SIZE));
+            auto cellMatrix{ m_Cells.GetSubMatrix(regionY * REGION_SIZE, regionX * REGION_SIZE, REGION_SIZE, REGION_SIZE) };
+            auto matrixData{ cellMatrix.GetData() };
+
+            for (auto& cell : matrixData)
+            {
+                cell->SetRegionId(regionId);
+            }
+
+            m_CellRegions.insert({ regionId, std::move(cellMatrix)});
+
+            ++regionId;
         }
     }
+}
+
+void HP::HierarchicalGrid::BuildAbstractGraph()
+{
+    // Loop through each region
+    // 
+    // Start out with empty vectors for each region (Use a map)
+    // 
+    // Get the border cells and their connected cells (Do 4 checks -> Up, Down, Left, Right)
+    // 
+    // Compare the cells to each other -> Find the maximum border
+    //
+
+    for (auto& region : m_CellRegions)
+    {
+        int regionId{ region.first };
+        auto connectedRegions{ m_RegionGrid.FindConnectedCells(regionId) };
+
+        auto regionExtConn{ GetExternalConnectionFromRegion(regionId) };
+
+        for (auto connRegion : connectedRegions)
+        {
+            int neighborRegionId{ connRegion->GetId() };
+
+            auto neighborExtConn{ GetExternalConnectionFromRegion(neighborRegionId) };
+
+            auto commonConnections{ FindCommonConnections(regionExtConn, neighborExtConn) };
+
+            auto commonCells{ GetCellsFromConnections(commonConnections) };
+
+            for (auto conn : commonConnections)
+            {
+                auto iter{ std::ranges::find(m_AbstractConnections, *conn) };
+
+                if (iter != m_AbstractConnections.end()) continue;
+
+                m_AbstractConnections.push_back(Connection{ conn->GetFromCell(), conn->GetToCell() });
+            }
+
+            for (auto cell : commonCells)
+            {
+                if (cell->GetRegionId() == regionId)
+                {
+                    m_AbstractGraph.push_back(cell);
+                }
+            }
+        }
+    }
+}
+
+std::set<Cell*> HP::HierarchicalGrid::GetCellsOfRegion(int regionId)
+{
+    std::set<Cell*> result{};
+
+    for (auto& cell : m_Cells.GetData())
+    {
+        if (cell.GetRegionId() == regionId)
+        {
+            result.insert(&cell);
+        }
+    }
+
+    return result;
+}
+
+std::vector<Connection*> HP::Grid::GetConnectionFromCells(std::set<Cell*> const& cells)
+{
+    std::vector<Connection*> result{};
+
+    for (auto cell : cells)
+    {
+        auto connections{ FindConnectionsFromCell(cell->GetId()) };
+        result.insert(result.end(), connections.begin(), connections.end());
+    }
+
+    return result;
+}
+
+std::set<Connection*> HP::HierarchicalGrid::GetExternalConnectionFromRegion(int regionId)
+{
+    std::set<Connection*> result{};
+
+    auto iter{ m_CellRegions.find(regionId) };
+    
+    if (iter != m_CellRegions.end())
+    {
+        auto cells{ GetCellsOfRegion(regionId) };
+        auto connections{ GetConnectionFromCells(cells) };
+
+        for (auto connection : connections)
+        {
+            auto toCell{ GetCell(connection->GetToCell()) };
+
+            if (toCell == nullptr) continue;
+
+            auto toCellIter{ std::ranges::find(cells, toCell) };
+
+            if (toCellIter != cells.end()) continue;
+
+            result.insert(connection);
+        }
+    }
+
+    return result;
+}
+
+std::vector<Connection*> HP::Grid::FindCommonConnections(std::set<Connection*> connectionsA, std::set<Connection*> connectionsB)
+{
+    std::vector<Connection*> result{};
+
+    for (auto conn : connectionsA)
+    {
+        for (auto otherConn : connectionsB)
+        {
+            if ((conn->GetToCell() == otherConn->GetToCell() and conn->GetFromCell() == otherConn->GetFromCell())
+                or
+                (conn->GetFromCell() == otherConn->GetToCell() and conn->GetToCell() == otherConn->GetFromCell())
+                )
+            {
+                //result.push_back(GetCell(conn->GetFromCell
+                //result.push_back(GetCell(conn->GetToCell()));
+
+                result.push_back(conn);
+                result.push_back(otherConn);
+            }
+        }
+    }
+
+    return result;
+}
+
+std::vector<Cell*> HP::Grid::GetCellsFromConnections(std::vector<Connection*> connections)
+{
+    std::vector<Cell*> result{};
+    std::set<int> cellIds{};
+
+    for (auto connection : connections)
+    {
+        cellIds.insert(connection->GetFromCell());
+        cellIds.insert(connection->GetToCell());
+    }
+
+    result.reserve(cellIds.size());
+
+    for (int cellId : cellIds)
+    {
+        result.push_back(m_Cells.GetCellPtr(cellId));
+    }
+
+    return result;
+}
+
+void HP::HierarchicalGrid::Draw() const
+{
+    Grid::Draw();
+
+    //for (auto const& region : m_CellRegions)
+    //{
+    //    auto topLeftCell{ region.second.GetCell(0, 0) };
+    //    auto bottomRightCell{ region.second.GetCell(region.second.GetRowSize() - 1, region.second.GetColSize() - 1) };
+
+    //    if (topLeftCell == nullptr or bottomRightCell == nullptr)
+    //    {
+    //        continue;
+    //    }
+
+    //    auto topLeftPos{ GetCellCenter(topLeftCell->GetId()) };
+    //    auto bottomRightPos{ GetCellCenter(bottomRightCell->GetId()) };
+
+    //    Rectangle targetRect{
+    //        static_cast<float>(topLeftPos.x - m_CellWidth / 2.f) + DRAW_MARGIN,
+    //        static_cast<float>(topLeftPos.y - m_CellHeight / 2.f) + DRAW_MARGIN,
+    //        static_cast<float>((bottomRightPos.x - topLeftPos.x) + m_CellWidth) - (DRAW_MARGIN * 2.f),
+    //        static_cast<float>((bottomRightPos.y - topLeftPos.y) + m_CellHeight) - (DRAW_MARGIN * 2.f),
+    //    };
+
+    //    DrawRectangleLinesEx(targetRect, 2.f, ORANGE);
+    //}
+
+    for (auto const& connection : m_AbstractConnections)
+    {
+        auto [cellAId, cellBId] { connection.GetConnectedCells() };
+        auto cellACenter{ GetCellCenter(cellAId) };
+        auto cellBCenter{ GetCellCenter(cellBId) };
+        DrawLine(
+            cellACenter.x,
+            cellACenter.y,
+            cellBCenter.x,
+            cellBCenter.y,
+            ORANGE
+        );
+    }
+}
+
+HP::HierarchicalGrid::HierarchicalGrid(int rows, int cols, int posX, int posY, int width, int height)
+    : Grid{ rows, cols, posX, posY, width, height }
+{
+    SubdivideCellsIntoRegions();
+    BuildAbstractGraph();
 }
 
 void Grid::MouseClicked()
@@ -146,14 +377,14 @@ void Grid::Draw() const
             );
         }
 
-        //Rectangle targetRect{
-        //    static_cast<float>(m_Position.x + (cellCol * m_CellWidth)),
-        //    static_cast<float>(m_Position.y + (cellRow * m_CellHeight)),
-        //    static_cast<float>(m_CellWidth),
-        //    static_cast<float>(m_CellHeight),
-        //};
+        Rectangle targetRect{
+            static_cast<float>(m_Position.x + (cellCol * m_CellWidth)),
+            static_cast<float>(m_Position.y + (cellRow * m_CellHeight)),
+            static_cast<float>(m_CellWidth),
+            static_cast<float>(m_CellHeight),
+        };
 
-        //GuiLabel(targetRect, std::to_string(index).c_str());
+        GuiLabel(targetRect, std::to_string(index).c_str());
     }
 
     for (int index{ 0 }; index < m_Cells.GetRowSize(); ++index)
@@ -180,29 +411,6 @@ void Grid::Draw() const
             endPos.y,
             { 200,200,200,100 }
         );
-    }
-
-    for (auto const& region : m_CellRegions)
-    {
-        auto topLeftCell{ region.GetCell(0, 0) };
-        auto bottomRightCell{ region.GetCell(region.GetRowSize() - 1, region.GetColSize() - 1) };
-
-        if (topLeftCell == nullptr or bottomRightCell == nullptr)
-        {
-            continue;
-        }
-
-        auto topLeftPos{ GetCellCenter(topLeftCell->GetId()) };
-        auto bottomRightPos{ GetCellCenter(bottomRightCell->GetId()) };
-
-        Rectangle targetRect{
-            static_cast<float>(topLeftPos.x - m_CellWidth / 2.f) + DRAW_MARGIN,
-            static_cast<float>(topLeftPos.y - m_CellHeight / 2.f) + DRAW_MARGIN,
-            static_cast<float>((bottomRightPos.x - topLeftPos.x) + m_CellWidth) - (DRAW_MARGIN * 2.f),
-            static_cast<float>((bottomRightPos.y - topLeftPos.y) + m_CellHeight) - (DRAW_MARGIN * 2.f),
-        };
-
-        DrawRectangleLinesEx(targetRect, 2.f, ORANGE);
     }
 
     //for (auto const& cell : m_Cells)
@@ -235,29 +443,18 @@ void Grid::Draw() const
 }
  
 Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)
-    //: m_Rows{rows}
-    //, m_Cols{cols}
     : m_Dimensions{width, height}
     , m_CellWidth{ m_Dimensions.x / cols }
     , m_CellHeight{ m_Dimensions.y / rows }
     , m_Cells{ rows, cols }
     , m_Position{posX, posY}
 {
-    //int totalCells{ rows * cols };
-    //m_Cells.reserve(totalCells);
-
-    //for (int index{ 0 }; index < totalCells; ++index)
-    //{
-    //    m_Cells.emplace_back(index, CellType::Empty);
-    //}
-
     for (int index{ 0 }; index < m_Cells.GetSize(); ++index)
     {
         m_Cells.SetCell(index, Cell{index, CellType::Empty});
     }
 
     GenerationConnections();
-    SubdivideCellsIntoRegions();
 }
 
 void Grid::GenerationConnections()

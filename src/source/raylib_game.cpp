@@ -13,12 +13,14 @@
 ********************************************************************************************/
 
 #include <constants.h>
-#include <scene.h>
 #include <grid.h>
+#include <scene.h>
 
 #include <raylib.h>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
+
+#include <memory>
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -47,8 +49,6 @@ int main(void)
 
     SetMusicVolume(music, 1.0f);
     PlayMusicStream(music);
-
-    scene.SetGrid(HP::Grid{ 10, 10, 0, 0, HP::Consts::SCREEN_WIDTH, HP::Consts::SCREEN_HEIGHT - 100 });
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
