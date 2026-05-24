@@ -1,10 +1,11 @@
-#include <cell.h>
+#include <graph/graph.h>
+#include <graph/grid.h>
 #include <pathfinding/astar.h>
 #include <structs.h>
-#include <graph/grid.h>
-#include <graph/graph.h>
 
 #include <algorithm>
+#include <cstdlib>
+#include <cell.h>
 #include <vector>
 
 using namespace HP;
@@ -69,7 +70,8 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGra
 	CurrentNodeRecord.pCell = pStartCell;
 	CurrentNodeRecord.pConnection = nullptr;
 	CurrentNodeRecord.costSoFar = 0.0f;
-	CurrentNodeRecord.estimatedTotalCost = GetHeuristicCost(*pStartCell, *pDestCell, pGraph);
+    CurrentNodeRecord.distanceToDest = GetHeuristicCost(*pStartCell, *pDestCell, pGraph);
+	CurrentNodeRecord.CalculateEstimatedTotalCost();
 	OpenList.push_back(CurrentNodeRecord);
 
 	CellRecord NeighborCellRecord{};
@@ -99,7 +101,8 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGra
 			NeighborCellRecord.pCell = pGraph->GetCell(Conn->GetToCell());
 			NeighborCellRecord.pConnection = Conn;
 			NeighborCellRecord.costSoFar = CurrentNodeRecord.costSoFar + Conn->GetWeight();
-			NeighborCellRecord.estimatedTotalCost = NeighborCellRecord.costSoFar + GetHeuristicCost(*(NeighborCellRecord.pCell), *pDestCell, pGraph);
+			NeighborCellRecord.distanceToDest = GetHeuristicCost(*(NeighborCellRecord.pCell), *pDestCell, pGraph);
+            NeighborCellRecord.CalculateEstimatedTotalCost();
 
 			auto OpenListIter = std::ranges::find_if(OpenList, FindNeighborNodeId);
 			auto ClosedListIter = std::ranges::find_if(ClosedList, FindNeighborNodeId);
@@ -133,7 +136,7 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGra
 	{
 		auto ClosestNodeIter{ std::ranges::min_element(ClosedList, [](CellRecord const& RecordA, CellRecord const& RecordB)
 		{
-			return RecordA.estimatedTotalCost < RecordB.estimatedTotalCost;
+			return RecordA.distanceToDest < RecordB.distanceToDest;
 		}) };
 
 		CurrentNodeRecord = *ClosestNodeIter;

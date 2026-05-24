@@ -20,7 +20,13 @@ namespace HP
 			Cell* pCell = nullptr;
 			Connection* pConnection = nullptr;
 			float costSoFar = 0.f; // accumulated g-costs of all the connections leading up to this one
+            float distanceToDest = 0.f; // h-cost
 			float estimatedTotalCost = 0.f; // f-cost (= costSoFar + h-cost)
+
+			void CalculateEstimatedTotalCost()
+			{
+				estimatedTotalCost = costSoFar + distanceToDest;
+            }
 
 			bool operator==(const CellRecord& other) const
 			{
