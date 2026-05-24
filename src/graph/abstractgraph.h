@@ -18,12 +18,14 @@ namespace HP
         std::vector<Connection> m_Connections{};
         std::vector<Cell*> m_Cells{};
 
-        void SetConnectionsToCell(Cell* cell, std::vector<Cell*> toConnCells);
+        void SetConnectionsToCell(Cell* cell, std::vector<Cell*> toConnCells, bool intraRegion);
 
         std::vector<int> GetRegionIds() const;
 
         void BuildInterRegion();
         void BuildIntraRegion();
+
+        void CreateConnection(Cell* cellA, Cell* cellB, bool intraRegion);
 
     public:
         std::vector<Cell*> GetConnectedCells(int cellId) override;
@@ -32,6 +34,7 @@ namespace HP
         std::vector<Cell*> GetCellsFromRegion(int regionId) override;
         void CreateConnection(int cellAId, int cellBId) override;
         void CreateConnection(Cell* cellA, Cell* cellB) override;
+
 
         Cell* GetCell(int cellId) override;
         vec2<int> GetCellPosition(int cellId) const override;

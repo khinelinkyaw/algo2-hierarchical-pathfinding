@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cell.h>
 #include <vector>
+#include <set>
 
 using namespace HP;
 
@@ -60,9 +61,9 @@ std::vector<vec2<float>> AStar::ConvertToFloatPath(std::vector<Cell*> const& cel
 	return floatPath;
 }
 
-float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGraph, std::vector<Cell*>* finalPath)
+AStar::PathResult AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGraph, std::vector<Cell*>* finalPath)
 {
-	float totalCost{};
+    PathResult result{};
 	std::vector<CellRecord> OpenList{};
 	std::vector<CellRecord> ClosedList{};
 
@@ -90,7 +91,7 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGra
 		{
 			ClosedList.push_back(CurrentNodeRecord);
 			OpenList.clear();
-            totalCost = CurrentNodeRecord.estimatedTotalCost;
+			result.totalCost = CurrentNodeRecord.estimatedTotalCost;
 			break;
 		}
 
@@ -140,11 +141,21 @@ float AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGra
 		}) };
 
 		CurrentNodeRecord = *ClosestNodeIter;
+        result.pathFound = false;
 	}
 
 	if (finalPath != nullptr)
 	{
 		BacktrackFullPath(ClosedList, CurrentNodeRecord, *finalPath);
+
+		std::set<int> regionIds{};
+		for (auto cell : *finalPath)
+		{
+            regionIds.insert(cell->GetRegionId());
+		}
+
+		if (regionIds.size() == 1) result.intraRegionPath = true;
 	}
-    return totalCost;
+
+    return result;
 }

@@ -15,6 +15,13 @@ namespace HP
 	class AStar final
 	{
 	public:
+		struct PathResult
+		{
+            float totalCost = 0.f;
+            bool pathFound = true;
+            bool intraRegionPath = false;
+		};
+
 		struct CellRecord
 		{
 			Cell* pCell = nullptr;
@@ -51,7 +58,7 @@ namespace HP
 		static float GetHeuristicCost(Cell const& startCell, Cell const& endCell, Graph* pGraph);
         static float GetHeuristicCost(int startCellId, int endCellId, Graph* pGraph);
 		static std::vector<vec2<float>> ConvertToFloatPath(std::vector<Cell*> const& cellPath, Grid* pGrid);
-		static float FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGraph, std::vector<Cell*>* finalPath);
+		static PathResult FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGraph, std::vector<Cell*>* finalPath);
 	};
 }
 

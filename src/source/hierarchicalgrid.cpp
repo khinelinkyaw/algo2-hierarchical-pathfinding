@@ -58,9 +58,15 @@ void HP::HierarchicalGrid::Draw() const
     m_AbstractGraph.Draw();
 }
 
+void HP::HierarchicalGrid::GenerationConnections()
+{
+    Grid::GenerationConnections();
+    m_AbstractGraph.BuildAbstractGraph();
+}
+
 HP::HierarchicalGrid::HierarchicalGrid(int rows, int cols, int posX, int posY, int width, int height)
     : Grid{ rows, cols, posX, posY, width, height }
 {
     SubdivideCellsIntoRegions();
-    m_AbstractGraph.BuildAbstractGraph();
+    GenerationConnections();
 }

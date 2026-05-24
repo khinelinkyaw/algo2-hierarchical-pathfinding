@@ -28,6 +28,8 @@ namespace HP
 
         Grid GetRegionGrid() { return m_RegionGrid; }
 
+        void GenerationConnections() override;
+
         HierarchicalGrid() = default;
         HierarchicalGrid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::SCREEN_HEIGHT);
         ~HierarchicalGrid() override = default;

@@ -54,7 +54,7 @@ namespace HP
 
         int GetSize() const { return m_Cells.GetSize(); }
 
-        void GenerationConnections();
+        virtual void GenerationConnections();
 
         Grid() = default;
         Grid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::SCREEN_HEIGHT);

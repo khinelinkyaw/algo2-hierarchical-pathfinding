@@ -10,14 +10,14 @@
 
 using namespace HP;
 
-void HP::AbstractGraph::SetConnectionsToCell(Cell* cell, std::vector<Cell*> toConnCells)
+void HP::AbstractGraph::SetConnectionsToCell(Cell* cell, std::vector<Cell*> toConnCells, bool intraRegion)
 {
     for (auto connCell : toConnCells)
     {
         if (cell->GetId() == connCell->GetId()) continue;
 
-        CreateConnection(cell, connCell);
-        CreateConnection(connCell, cell);
+        CreateConnection(cell, connCell, intraRegion);
+        CreateConnection(connCell, cell, intraRegion);
     }
 }
 
@@ -73,6 +73,13 @@ void HP::AbstractGraph::CreateConnection(int cellAId, int cellBId)
 
 void HP::AbstractGraph::CreateConnection(Cell* cellA, Cell* cellB)
 {
+    CreateConnection(cellA, cellB, false);
+}
+
+void HP::AbstractGraph::CreateConnection(Cell* cellA, Cell* cellB, bool intraRegion)
+{
+    std::vector<Cell*> tempPath{};
+
     if (cellA != nullptr and cellB != nullptr)
     {
         Connection connection{ cellA->GetId(), cellB->GetId() };
@@ -80,11 +87,20 @@ void HP::AbstractGraph::CreateConnection(Cell* cellA, Cell* cellB)
 
         if (iter == m_Connections.end())
         {
-            connection.SetWeight(AStar::FindPath(cellA, cellB, this, nullptr));
+            tempPath.clear();
+            auto pathResult{ AStar::FindPath(cellA, cellB, m_pHGrid, &tempPath) };
+
+            if (not pathResult.pathFound or (intraRegion == true and not pathResult.intraRegionPath))
+            {
+                return;
+            }
+
+            connection.SetWeight(pathResult.totalCost);
             m_Connections.push_back(connection);
         }
     }
 }
+
 
 Cell* HP::AbstractGraph::GetCell(int cellId)
 {
@@ -141,6 +157,9 @@ void HP::AbstractGraph::Draw() const
 
 void HP::AbstractGraph::BuildInterRegion()
 {
+    m_Connections.clear();
+    m_Cells.clear();
+
     auto regionGrid{ m_pHGrid->GetRegionGrid() };
     auto regions{ regionGrid.GetCells() };
 
@@ -192,7 +211,7 @@ void HP::AbstractGraph::BuildIntraRegion()
 
         for (auto cell : regionCells)
         {
-            SetConnectionsToCell(cell, regionCells);
+            SetConnectionsToCell(cell, regionCells, true);
         }
     }
 }

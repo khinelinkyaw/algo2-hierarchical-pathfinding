@@ -6,20 +6,9 @@
 #include <raylib.h>
 
 #include <memory>
-#include <utility>
 #include <vector>
 
 using namespace HP;
-
-void Scene::SetGrid(Grid const& grid)
-{
-    m_Grid = std::make_unique<Grid>(grid);
-}
-
-void Scene::SetGrid(std::unique_ptr<Grid>&& grid)
-{
-    m_Grid = std::move(grid);
-}
 
 void Scene::Update()
 {
