@@ -5,6 +5,7 @@
 #include <connection.h>
 #include <graph/graph.h>
 #include <structs.h>
+#include <pathfinding/astar.h>
 
 #include <vector>
 
@@ -25,6 +26,7 @@ namespace HP
         void BuildInterRegion();
         void BuildIntraRegion();
 
+        void AddCell(Cell* cell);
         void CreateConnection(Cell* cellA, Cell* cellB, bool intraRegion);
 
     public:
@@ -44,6 +46,8 @@ namespace HP
         void BuildAbstractGraph();
 
         void Draw() const override;
+
+        AStar::PathResult FindPath(Cell* const pStartCell, Cell* const pDestCell, std::vector<Cell*>* finalPath);
 
         AbstractGraph(HierarchicalGrid* pHGrid);
         ~AbstractGraph() override = default;

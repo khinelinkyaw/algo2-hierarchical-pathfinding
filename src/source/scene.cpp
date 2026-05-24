@@ -36,10 +36,10 @@ void Scene::RefreshPathForAgent()
 
     if (startCell != nullptr and m_DestCell != nullptr)
     {
-        std::vector<Cell*> cellPath{};
-        AStar::FindPath(startCell, m_DestCell, m_Grid.get(), &cellPath);
+        std::vector<Cell*> cellPath{ m_Grid->FindPath(startCell, m_DestCell) };
         auto floatPath{ AStar::ConvertToFloatPath(cellPath, m_Grid.get()) };
-        m_Agent.SetPath(floatPath);
+
+        if (!floatPath.empty()) m_Agent.SetPath(floatPath);
     }
 }
 

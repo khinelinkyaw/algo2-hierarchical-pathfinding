@@ -5,8 +5,9 @@
 #include <pathfinding/astar.h>
 
 #include <algorithm>
-#include <vector>
 #include <raylib.h>
+#include <utility>
+#include <vector>
 
 using namespace HP;
 
@@ -42,7 +43,7 @@ std::vector<Connection*> HP::AbstractGraph::GetConnectionsFromCell(int cellId)
 
     for (auto& connection : m_Connections)
     {
-        if (connection.GetFromCell() == cellId)
+        if (connection.GetFromCell() == cellId and GetCell(connection.GetToCell()) != nullptr)
         {
             result.push_back(&connection);
         }
@@ -74,6 +75,16 @@ void HP::AbstractGraph::CreateConnection(int cellAId, int cellBId)
 void HP::AbstractGraph::CreateConnection(Cell* cellA, Cell* cellB)
 {
     CreateConnection(cellA, cellB, false);
+}
+
+void HP::AbstractGraph::AddCell(Cell* cell)
+{
+    auto iter{ std::ranges::find(m_Cells, cell) };
+
+    if (iter == m_Cells.end())
+    {
+        m_Cells.push_back(cell);
+    }
 }
 
 void HP::AbstractGraph::CreateConnection(Cell* cellA, Cell* cellB, bool intraRegion)
@@ -153,6 +164,25 @@ void HP::AbstractGraph::Draw() const
             RED
         );
     }
+}
+
+AStar::PathResult HP::AbstractGraph::FindPath(Cell* const pStartCell, Cell* const pDestCell, std::vector<Cell*>* finalPath)
+{
+    AStar::PathResult result{};
+    std::vector<Cell*> baseCells{ m_Cells };
+    std::vector<Connection> baseConnections{ m_Connections };
+
+    AddCell(pStartCell);
+    AddCell(pDestCell);
+
+    SetConnectionsToCell(pStartCell, GetCellsFromRegion(pStartCell->GetRegionId()), true);
+    SetConnectionsToCell(pDestCell, GetCellsFromRegion(pDestCell->GetRegionId()), true);
+
+    result = AStar::FindPath(pStartCell, pDestCell, this, finalPath);
+
+    m_Cells = std::move(baseCells);
+    m_Connections = std::move(baseConnections);
+    return result;
 }
 
 void HP::AbstractGraph::BuildInterRegion()

@@ -1,12 +1,14 @@
 #include <graph/hierarchicalgrid.h>
-
 #include <cell.h>
 #include <graph/grid.h>
+#include <connection.h>
+#include <pathfinding/astar.h>
+
+#include <raylib.h>
 
 #include <cmath>
-#include <connection.h>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using namespace HP;
 
@@ -56,12 +58,41 @@ void HP::HierarchicalGrid::Draw() const
 {
     Grid::Draw();
     m_AbstractGraph.Draw();
+
+    for (int index{ 0 }; index < static_cast<int>(m_AbstractPath.size()) - 1; ++index)
+    {
+        auto cellA{ m_AbstractPath[index] };
+        auto cellB{ m_AbstractPath[index + 1] };
+        auto cellAPos{ GetCellCenter(*cellA) };
+        auto cellBPos{ GetCellCenter(*cellB) };
+        DrawLineEx(
+            { static_cast<float>(cellAPos.x), static_cast<float>(cellAPos.y) },
+            { static_cast<float>(cellBPos.x), static_cast<float>(cellBPos.y) },
+            5.f,
+            ORANGE
+        );
+    }
 }
 
 void HP::HierarchicalGrid::GenerationConnections()
 {
     Grid::GenerationConnections();
     m_AbstractGraph.BuildAbstractGraph();
+}
+
+std::vector<Cell*> HP::HierarchicalGrid::FindPath(Cell* const pStartCell, Cell* const pDestCell)
+{
+    m_AbstractPath.clear();
+    auto pathResult{ m_AbstractGraph.FindPath(pStartCell, pDestCell, &m_AbstractPath) };
+
+    std::vector<Cell*> path{};
+
+    if (pathResult.pathFound)
+    {
+        pathResult = AStar::FindPath(pStartCell, pDestCell, this, &path);
+    }
+
+    return path;
 }
 
 HP::HierarchicalGrid::HierarchicalGrid(int rows, int cols, int posX, int posY, int width, int height)

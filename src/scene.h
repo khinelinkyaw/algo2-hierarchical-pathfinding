@@ -1,7 +1,6 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <graph/grid.h>
 #include <cell.h>
 #include <agent.h>
 #include <graph/hierarchicalgrid.h>
@@ -13,14 +12,11 @@ namespace HP
     class Scene final
     {
     private:
-        std::unique_ptr<Grid> m_Grid{ std::make_unique<HierarchicalGrid>(20,20) };
+        std::unique_ptr<HierarchicalGrid> m_Grid{ std::make_unique<HierarchicalGrid>(10,10) };
         Agent m_Agent{};
         Cell* m_DestCell{};
 
     public:
-        void SetGrid(Grid const& grid);
-        void SetGrid(std::unique_ptr<Grid>&& grid);
-
         void Update();
         void RefreshPathForAgent();
         void Draw() const;
