@@ -40,7 +40,7 @@ namespace HP
 
         void BuildAbstractGraph();
 
-        void Draw() const;
+        void Draw() const override;
 
         AbstractGraph(HierarchicalGrid* pHGrid);
         ~AbstractGraph() override = default;

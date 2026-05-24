@@ -50,7 +50,7 @@ namespace HP
         std::vector<Cell*> GetCellsFromConnections(std::vector<Connection*> connections);
 
         void MouseClicked();
-        virtual void Draw() const;
+        virtual void Draw() const override;
 
         int GetSize() const { return m_Cells.GetSize(); }
 

@@ -22,6 +22,8 @@ namespace HP
         virtual Cell* GetCell(int cellId) = 0;
         virtual vec2<int> GetCellPosition(int cellId) const = 0;
 
+        virtual void Draw() const = 0;
+
         virtual ~Graph() = default;
     };
 }
