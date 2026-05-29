@@ -4,9 +4,10 @@
 #include <cell.h>
 #include <connection.h>
 #include <graph/graph.h>
-#include <pathfinding/heuristics.h>
 #include <graph/grid.h>
+#include <pathfinding/heuristics.h>
 
+#include <memory>
 #include <structs.h>
 #include <vector>
 
@@ -20,6 +21,8 @@ namespace HP
             float totalCost = 0.f;
             bool pathFound = true;
             bool intraRegionPath = false;
+            int pathNodeLength = 0;
+            int regionsTraversed = 0;
 		};
 
 		struct CellRecord
@@ -50,16 +53,25 @@ namespace HP
 		};
 
 	private:
-		HeuristicFunctions::Heuristic m_HeuristicFunction;
+		static inline std::unique_ptr<Heuristic> m_Heuristic{ std::make_unique<Euclidean>() };
 
 		static void BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord, std::vector<Cell*>& finalPath);
 
 	public:
+		template<typename T>
+		static void SetHeuristic();
+
 		static float GetHeuristicCost(Cell const& startCell, Cell const& endCell, Graph* pGraph);
         static float GetHeuristicCost(int startCellId, int endCellId, Graph* pGraph);
 		static std::vector<vec2<float>> ConvertToFloatPath(std::vector<Cell*> const& cellPath, Grid* pGrid);
 		static PathResult FindPath(Cell* const pStartCell, Cell* const pDestCell, Graph* pGraph, std::vector<Cell*>* finalPath);
 	};
+
+	template<typename T>
+	inline void AStar::SetHeuristic()
+	{
+		m_Heuristic = std::make_unique<T>();
+	}
 }
 
 #endif

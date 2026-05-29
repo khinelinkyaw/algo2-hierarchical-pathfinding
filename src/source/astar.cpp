@@ -21,7 +21,10 @@ float HP::AStar::GetHeuristicCost(int startCellId, int endCellId, Graph* pGraph)
 	auto toDest{
 		pGraph->GetCellPosition(startCellId) - pGraph->GetCellPosition(endCellId)
 	};
-	return static_cast<float>(abs(static_cast<float>(toDest.x)) + abs(static_cast<float>(toDest.y)));
+
+	return m_Heuristic->Calculate(abs(static_cast<float>(toDest.x)), abs(static_cast<float>(toDest.y)));
+
+	//return static_cast<float>( +);
 }
 
 void AStar::BacktrackFullPath(std::vector<CellRecord> const& ClosedList, CellRecord const& startingCellRecord, std::vector<Cell*>& finalPath)
@@ -155,6 +158,9 @@ AStar::PathResult AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell,
 		}
 
 		if (regionIds.size() == 1) result.intraRegionPath = true;
+
+		result.pathNodeLength = static_cast<int>(finalPath->size());
+		result.regionsTraversed = static_cast<int>(regionIds.size());
 	}
 
     return result;
