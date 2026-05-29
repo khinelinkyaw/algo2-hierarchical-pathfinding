@@ -4,9 +4,11 @@
 #include <cell.h>
 #include <connection.h>
 #include <constants.h>
+#include <graph/graph.h>
 #include <matrix.h>
 #include <structs.h>
-#include <graph/graph.h>
+
+#include <raylib.h>
 
 #include <vector>
 
@@ -52,12 +54,22 @@ namespace HP
         void MouseClicked();
         virtual void Draw() const override;
 
+        void DrawCellBorders(Color color = Color{ 200,200,200,100 }, float thickness = 2.f) const;
+
+        void DrawCellEffects() const;
+
+        void SetCellWidth(int cellWidth);
+        void SetCellHeight(int cellHeight);
+
         int GetSize() const { return m_Cells.GetSize(); }
 
         virtual void GenerationConnections();
 
+        int GetRows() const { return m_Cells.GetRowSize(); }
+        int GetCols() const { return m_Cells.GetColSize(); }
+
         Grid() = default;
-        Grid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::SCREEN_HEIGHT);
+        Grid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::GRID_HEIGHT);
         virtual ~Grid() = default;
     };
 }

@@ -206,6 +206,41 @@ void Grid::MouseClicked()
 
 void Grid::Draw() const
 {
+    DrawCellEffects();
+
+    DrawCellBorders();
+}
+
+void HP::Grid::DrawCellBorders(Color color, float thickness) const
+{
+    for (int index{ 0 }; index < m_Cells.GetRowSize(); ++index)
+    {
+        Vector2 startPos{ static_cast<float>(m_Position.x), static_cast<float>(m_Position.y + (index * m_CellHeight)) };
+        Vector2 endPos{ static_cast<float>(m_Position.x + m_Dimensions.x), static_cast<float>(m_Position.y + (index * m_CellHeight)) };
+
+        DrawLineEx(
+            startPos,
+            endPos,
+            thickness,
+            color
+        );
+    }
+
+    for (int index{ 0 }; index < m_Cells.GetColSize(); ++index)
+    {
+        Vector2 startPos{ static_cast<float>(m_Position.x + (index * m_CellWidth)), static_cast<float>(m_Position.y) };
+        Vector2 endPos{ static_cast<float>(m_Position.x + (index * m_CellWidth)), static_cast<float>(m_Position.y + m_Dimensions.y)};
+        DrawLineEx(
+            startPos,
+            endPos,
+            thickness,
+            color
+        );
+    }
+}
+
+void HP::Grid::DrawCellEffects() const
+{
     for (int index{ 0 }; index < static_cast<int>(m_Cells.GetSize()); ++index)
     {
         int cellRow{ static_cast<int>(index / m_Cells.GetColSize()) };
@@ -231,32 +266,18 @@ void Grid::Draw() const
 
         GuiLabel(targetRect, std::to_string(index).c_str());
     }
+}
 
-    for (int index{ 0 }; index < m_Cells.GetRowSize(); ++index)
-    {
-        vec2 startPos{m_Position.x, m_Position.y + (index * m_CellHeight)};
-        vec2 endPos{m_Position.x + m_Dimensions.x, m_Position.y + (index * m_CellHeight)};
-        DrawLine(
-            startPos.x,
-            startPos.y,
-            endPos.x,
-            endPos.y,
-            {200,200,200,100}
-        );
-    }
+void HP::Grid::SetCellWidth(int cellWidth)
+{
+    m_CellWidth = cellWidth;
+    m_Dimensions.x = m_CellWidth * m_Cells.GetColSize();
+}
 
-    for (int index{ 0 }; index < m_Cells.GetColSize(); ++index)
-    {
-        vec2 startPos{ m_Position.x + (index * m_CellWidth), m_Position.y };
-        vec2 endPos{ m_Position.x + (index * m_CellWidth), m_Position.y + m_Dimensions.y };
-        DrawLine(
-            startPos.x,
-            startPos.y,
-            endPos.x,
-            endPos.y,
-            { 200,200,200,100 }
-        );
-    }
+void HP::Grid::SetCellHeight(int cellHeight)
+{
+    m_CellHeight = cellHeight;
+    m_Dimensions.y = m_CellHeight * m_Cells.GetRowSize();
 }
  
 Grid::Grid(int rows, int cols, int posX, int posY, int width, int height)

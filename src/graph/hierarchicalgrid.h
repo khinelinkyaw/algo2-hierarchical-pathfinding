@@ -35,7 +35,7 @@ namespace HP
         std::vector<Cell*> FindPath(Cell* const pStartCell, Cell* const pDestCell);
 
         HierarchicalGrid() = default;
-        HierarchicalGrid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::SCREEN_HEIGHT);
+        HierarchicalGrid(int rows, int cols, int posX = 0, int posY = 0, int width = Consts::SCREEN_WIDTH, int height = Consts::GRID_HEIGHT);
         ~HierarchicalGrid() override = default;
     };
 }

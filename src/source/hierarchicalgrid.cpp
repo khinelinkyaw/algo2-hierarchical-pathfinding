@@ -3,6 +3,7 @@
 #include <graph/grid.h>
 #include <connection.h>
 #include <pathfinding/astar.h>
+#include <ui.h>
 
 #include <raylib.h>
 
@@ -20,6 +21,8 @@ void HierarchicalGrid::SubdivideCellsIntoRegions()
     int numRegionsY{ static_cast<int>(std::ceil(static_cast<float>(m_Cells.GetRowSize()) / REGION_SIZE)) };
 
     m_RegionGrid = Grid{ numRegionsY, numRegionsX };
+    m_RegionGrid.SetCellWidth(m_CellWidth * REGION_SIZE);
+    m_RegionGrid.SetCellHeight(m_CellHeight * REGION_SIZE);
 
     int regionId{ 0 };
     for (int regionY{ 0 }; regionY < numRegionsY; ++regionY)
@@ -57,7 +60,7 @@ std::vector<Connection*> HP::Grid::GetConnectionFromCells(std::vector<Cell*> con
 void HP::HierarchicalGrid::Draw() const
 {
     Grid::Draw();
-    m_AbstractGraph.Draw();
+    //m_AbstractGraph.Draw();
 
     for (int index{ 0 }; index < static_cast<int>(m_AbstractPath.size()) - 1; ++index)
     {
@@ -72,6 +75,8 @@ void HP::HierarchicalGrid::Draw() const
             ORANGE
         );
     }
+
+    m_RegionGrid.DrawCellBorders(GRAY, 5.f);
 }
 
 void HP::HierarchicalGrid::GenerationConnections()
@@ -91,6 +96,8 @@ std::vector<Cell*> HP::HierarchicalGrid::FindPath(Cell* const pStartCell, Cell* 
     {
         pathResult = AStar::FindPath(pStartCell, pDestCell, this, &path);
     }
+
+    UI::Instance().UpdatePath(pathResult);
 
     return path;
 }

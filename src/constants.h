@@ -4,7 +4,11 @@
 namespace HP::Consts
 {
     int constexpr SCREEN_WIDTH{ 1600 };
-    int constexpr SCREEN_HEIGHT{ 900 };
+    int constexpr SCREEN_HEIGHT{ 1000 };
+
+    int constexpr UI_HEIGHT{ 200 };
+
+    int constexpr GRID_HEIGHT{ SCREEN_HEIGHT - UI_HEIGHT };
 }
 
 #endif

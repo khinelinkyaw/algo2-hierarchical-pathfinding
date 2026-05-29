@@ -2,6 +2,7 @@
 #include <scene.h>
 #include <pathfinding/astar.h>
 #include <cell.h>
+#include <ui.h>
 
 #include <raylib.h>
 
@@ -59,6 +60,8 @@ void Scene::Draw() const
             10.f,
             RED);
     }
+
+    UI::Instance().Draw();
 }
 
 HP::Scene::Scene()
