@@ -83,6 +83,7 @@ void HP::UI::Draw()
 
         auto newHeuristics{ m_Heuristics[m_ActiveDropdownItem] };
 
+        // There is definitely a better way to do this, but it works for now.
         if (newHeuristics == "Manhattan")
         {
             AStar::SetHeuristic<Manhattan>();

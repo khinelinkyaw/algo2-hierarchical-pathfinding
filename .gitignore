@@ -78,3 +78,4 @@ android.*
 *.js
 !src/minshell.html
 !src/shell.html
+/.sync-exclude.lst
