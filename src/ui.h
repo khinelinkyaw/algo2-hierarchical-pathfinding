@@ -68,6 +68,8 @@ namespace HP
 
         void UpdatePath(AStar::PathResult pathResult);
         void Draw();
+        void DrawHeuristicDropdown();
+        void DrawStats();
     };
 }
 

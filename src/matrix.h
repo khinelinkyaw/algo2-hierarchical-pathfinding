@@ -83,6 +83,24 @@ namespace HP
             return nullptr;
         }
 
+        T const* GetCellPtr(int row, int col) const
+        {
+            if (row < m_Rows and col < m_Cols)
+            {
+                return &m_Data[(row * m_Cols) + col];
+            }
+            return nullptr;
+        }
+
+        T const* GetCellPtr(int index) const
+        {
+            if (index < m_Rows * m_Cols)
+            {
+                return &m_Data[index];
+            }
+            return nullptr;
+        }
+
         void SetCell(int row, int col, T const& value)
         {
             if (row < m_Rows and col < m_Cols)

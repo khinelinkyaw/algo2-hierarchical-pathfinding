@@ -12,6 +12,7 @@ namespace HP
         int m_FromCell{ Cell::INVALID_CELL_ID };
         int m_ToCell{ Cell::INVALID_CELL_ID };
         float m_Weight{ 1.f };
+        bool m_Active{ true };
 
     public:
         std::pair<int, int> GetConnectedCells() const;
@@ -20,6 +21,9 @@ namespace HP
 
         void SetWeight(float weight) { m_Weight = weight; }
         float GetWeight() const { return m_Weight; }
+
+        void SetActive(bool active) { m_Active = active; }
+        bool GetActive() const { return m_Active; }
 
         Connection(int fromCell, int toCell);
 

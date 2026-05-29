@@ -102,6 +102,8 @@ AStar::PathResult AStar::FindPath(Cell* const pStartCell, Cell* const pDestCell,
 
 		for (auto Conn : Connections)
 		{
+            if (Conn->GetActive() == false) continue;
+
 			NeighborCellRecord.pCell = pGraph->GetCell(Conn->GetToCell());
 			NeighborCellRecord.pConnection = Conn;
 			NeighborCellRecord.costSoFar = CurrentNodeRecord.costSoFar + Conn->GetWeight();

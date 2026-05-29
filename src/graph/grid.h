@@ -16,9 +16,6 @@ namespace HP
 {
     class Grid : public Graph
     {
-    private:
-        std::vector<Connection> m_Connections{};
-
     protected:
         vec2<int> m_Dimensions{};
         int m_CellWidth{};
@@ -53,6 +50,8 @@ namespace HP
 
         void MouseClicked();
         virtual void Draw() const override;
+
+        void DrawConnections() const;
 
         void DrawCellBorders(Color color = Color{ 200,200,200,100 }, float thickness = 2.f) const;
 

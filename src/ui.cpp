@@ -27,46 +27,12 @@ void HP::UI::UpdatePath(AStar::PathResult pathResult)
 
 void HP::UI::Draw()
 {
-    DrawRectangle(
-        POSITION.x,
-        POSITION.y,
-        Consts::SCREEN_WIDTH,
-        Consts::UI_HEIGHT,
-        DARKGRAY
-    );
+    DrawStats();
+    DrawHeuristicDropdown();
+}
 
-    DrawText(
-        m_StringMap.find(UIElement::ValidPath)->second.c_str(),
-        POSITION.x + PADDING,
-        POSITION.y + PADDING,
-        25,
-        ORANGE
-    );
-
-    DrawText(
-        m_StringMap.find(UIElement::NodeLength)->second.c_str(),
-        POSITION.x + PADDING,
-        POSITION.y + (PADDING * 2) +FONT_SIZE,
-        25,
-        ORANGE
-    );
-
-    DrawText(
-        m_StringMap.find(UIElement::RegionsTraversed)->second.c_str(),
-        POSITION.x + PADDING + COLUMN_SPACING,
-        POSITION.y + PADDING,
-        25,
-        ORANGE
-    );
-
-    DrawText(
-        m_StringMap.find(UIElement::PathCost)->second.c_str(),
-        POSITION.x + PADDING + COLUMN_SPACING,
-        POSITION.y + (PADDING * 2) + FONT_SIZE,
-        25,
-        ORANGE
-    );
-
+void HP::UI::DrawHeuristicDropdown()
+{
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
     {
         if (CheckCollisionPointRec(GetMousePosition(), DROPDOWN_BOUNDS))
@@ -105,4 +71,47 @@ void HP::UI::Draw()
             AStar::SetHeuristic<Chebyshev>();
         }
     }
+}
+
+void HP::UI::DrawStats()
+{
+    DrawRectangle(
+        POSITION.x,
+        POSITION.y,
+        Consts::SCREEN_WIDTH,
+        Consts::UI_HEIGHT,
+        DARKGRAY
+    );
+
+    DrawText(
+        m_StringMap.find(UIElement::ValidPath)->second.c_str(),
+        POSITION.x + PADDING,
+        POSITION.y + PADDING,
+        25,
+        ORANGE
+    );
+
+    DrawText(
+        m_StringMap.find(UIElement::NodeLength)->second.c_str(),
+        POSITION.x + PADDING,
+        POSITION.y + (PADDING * 2) + FONT_SIZE,
+        25,
+        ORANGE
+    );
+
+    DrawText(
+        m_StringMap.find(UIElement::RegionsTraversed)->second.c_str(),
+        POSITION.x + PADDING + COLUMN_SPACING,
+        POSITION.y + PADDING,
+        25,
+        ORANGE
+    );
+
+    DrawText(
+        m_StringMap.find(UIElement::PathCost)->second.c_str(),
+        POSITION.x + PADDING + COLUMN_SPACING,
+        POSITION.y + (PADDING * 2) + FONT_SIZE,
+        25,
+        ORANGE
+    );
 }

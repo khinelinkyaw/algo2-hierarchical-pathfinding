@@ -53,8 +53,8 @@ int main(void)
     SetTargetFPS(60);       // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    // Main game loop
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 18);
+    // Main game loop 
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
     GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_TOP);
     GuiSetStyle(DEFAULT, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
     GuiSetStyle(LABEL, TEXT_PADDING, 6);

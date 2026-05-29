@@ -3,14 +3,12 @@
 #include <pathfinding/astar.h>
 #include <structs.h>
 
-#include <raygui.h>
 #include <raylib.h>
 
 #include <algorithm>
 #include <cmath>
 #include <connection.h>
 #include <set>
-#include <string>
 #include <vector>
 
 using namespace HP;
@@ -76,6 +74,19 @@ std::vector<Cell*> HP::Grid::GetCellsFromRegion(int regionId)
         {
             result.push_back(&cell);
         }
+    }
+
+    return result;
+}
+
+std::vector<Connection*> HP::Grid::GetConnectionFromCells(std::vector<Cell*> const& cells)
+{
+    std::vector<Connection*> result{};
+
+    for (auto cell : cells)
+    {
+        auto connections{ GetConnectionsFromCell(cell->GetId()) };
+        result.insert(result.end(), connections.begin(), connections.end());
     }
 
     return result;
@@ -194,13 +205,14 @@ void Grid::MouseClicked()
         {
         case CellType::Empty:
             m_Cells.GetCell(cellIndex).SetCellType(CellType::Obstacle);
+            ChangeConnectionsActiveStateToCell(cellIndex, false);
             break;
         case CellType::Obstacle:
             m_Cells.GetCell(cellIndex).SetCellType(CellType::Empty);
+            ChangeConnectionsActiveStateToCell(cellIndex, true);
             break;
         }
 
-        GenerationConnections();
     }
 }
 
@@ -209,6 +221,27 @@ void Grid::Draw() const
     DrawCellEffects();
 
     DrawCellBorders();
+
+    //DrawConnections();
+}
+
+void HP::Grid::DrawConnections() const
+{
+    for (auto const& connection : m_Connections)
+    {
+        if (connection.GetActive() == false) continue;
+
+        auto fromCell{ m_Cells.GetCellPtr(connection.GetFromCell()) };
+        auto toCell{ m_Cells.GetCellPtr(connection.GetToCell()) };
+        auto fromPos{ GetCellCenter(*fromCell) };
+        auto toPos{ GetCellCenter(*toCell) };
+        DrawLineEx(
+            { static_cast<float>(fromPos.x), static_cast<float>(fromPos.y) },
+            { static_cast<float>(toPos.x), static_cast<float>(toPos.y) },
+            2.f,
+            ORANGE
+        );
+    }
 }
 
 void HP::Grid::DrawCellBorders(Color color, float thickness) const
@@ -256,15 +289,6 @@ void HP::Grid::DrawCellEffects() const
                 { 190, 33, 55, 100 }
             );
         }
-
-        Rectangle targetRect{
-            static_cast<float>(m_Position.x + (cellCol * m_CellWidth)),
-            static_cast<float>(m_Position.y + (cellRow * m_CellHeight)),
-            static_cast<float>(m_CellWidth),
-            static_cast<float>(m_CellHeight),
-        };
-
-        GuiLabel(targetRect, std::to_string(index).c_str());
     }
 }
 

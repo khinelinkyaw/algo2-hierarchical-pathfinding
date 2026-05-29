@@ -1,9 +1,9 @@
-#include <graph/hierarchicalgrid.h>
 #include <cell.h>
 #include <graph/grid.h>
-#include <connection.h>
+#include <graph/hierarchicalgrid.h>
 #include <pathfinding/astar.h>
 #include <ui.h>
+#include <graph/graph.h>
 
 #include <raylib.h>
 
@@ -44,23 +44,16 @@ void HierarchicalGrid::SubdivideCellsIntoRegions()
     }
 }
 
-std::vector<Connection*> HP::Grid::GetConnectionFromCells(std::vector<Cell*> const& cells)
+void HP::HierarchicalGrid::ChangeConnectionsActiveStateToCell(int cellId, bool state)
 {
-    std::vector<Connection*> result{};
-
-    for (auto cell : cells)
-    {
-        auto connections{ GetConnectionsFromCell(cell->GetId()) };
-        result.insert(result.end(), connections.begin(), connections.end());
-    }
-
-    return result;
+    Graph::ChangeConnectionsActiveStateToCell(cellId, state);
+    m_AbstractGraph.ChangeConnectionsActiveStateToCell(cellId, state);
 }
 
 void HP::HierarchicalGrid::Draw() const
 {
     Grid::Draw();
-    //m_AbstractGraph.Draw();
+    m_AbstractGraph.Draw();
 
     for (int index{ 0 }; index < static_cast<int>(m_AbstractPath.size()) - 1; ++index)
     {

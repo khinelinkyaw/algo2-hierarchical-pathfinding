@@ -12,7 +12,7 @@ namespace HP
     class Scene final
     {
     private:
-        std::unique_ptr<HierarchicalGrid> m_Grid{ std::make_unique<HierarchicalGrid>(30,30) };
+        std::unique_ptr<HierarchicalGrid> m_Grid{ std::make_unique<HierarchicalGrid>(10,10) };
         Agent m_Agent{};
         Cell* m_DestCell{};
 

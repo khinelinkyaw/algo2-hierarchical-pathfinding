@@ -11,6 +11,9 @@ namespace HP
 {
     class Graph
     {
+    protected:
+        std::vector<Connection> m_Connections{};
+
     public:
         virtual std::vector<Cell*> GetConnectedCells(int cellId) = 0;
         virtual std::vector<Connection*> GetConnectionsFromCell(int cellId) = 0;
@@ -21,6 +24,8 @@ namespace HP
 
         virtual Cell* GetCell(int cellId) = 0;
         virtual vec2<int> GetCellPosition(int cellId) const = 0;
+
+        virtual void ChangeConnectionsActiveStateToCell(int cellId, bool state);
 
         virtual void Draw() const = 0;
 

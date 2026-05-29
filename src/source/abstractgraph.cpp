@@ -89,29 +89,25 @@ void HP::AbstractGraph::AddCell(Cell* cell)
 
 void HP::AbstractGraph::CreateConnection(Cell* cellA, Cell* cellB, bool intraRegion)
 {
+    if (cellA == nullptr or cellB == nullptr) return;
+    if (cellA->GetCellType() == CellType::Obstacle or cellB->GetCellType() == CellType::Obstacle) return;
+
+    Connection connection{ cellA->GetId(), cellB->GetId() };
+    if (std::ranges::find(m_Connections, connection) != m_Connections.end()) return;
+
     std::vector<Cell*> tempPath{};
 
-    if (cellA != nullptr and cellB != nullptr)
+    tempPath.clear();
+    auto pathResult{ AStar::FindPath(cellA, cellB, m_pHGrid, &tempPath) };
+
+    if (not pathResult.pathFound or (intraRegion == true and not pathResult.intraRegionPath))
     {
-        Connection connection{ cellA->GetId(), cellB->GetId() };
-        auto iter{ std::ranges::find(m_Connections, connection) };
-
-        if (iter == m_Connections.end())
-        {
-            tempPath.clear();
-            auto pathResult{ AStar::FindPath(cellA, cellB, m_pHGrid, &tempPath) };
-
-            if (not pathResult.pathFound or (intraRegion == true and not pathResult.intraRegionPath))
-            {
-                return;
-            }
-
-            connection.SetWeight(pathResult.totalCost);
-            m_Connections.push_back(connection);
-        }
+        return;
     }
-}
 
+    connection.SetWeight(pathResult.totalCost);
+    m_Connections.push_back(connection);
+}
 
 Cell* HP::AbstractGraph::GetCell(int cellId)
 {
@@ -155,6 +151,8 @@ void HP::AbstractGraph::Draw() const
 {
     for (auto& connection : m_Connections)
     {
+        if (connection.GetActive() == false) continue;
+
         auto fromCellPos{ m_pHGrid->GetCellCenter(connection.GetFromCell()) };
         auto toCellPos{ m_pHGrid->GetCellCenter(connection.GetToCell()) };
 
@@ -185,6 +183,40 @@ AStar::PathResult HP::AbstractGraph::FindPath(Cell* const pStartCell, Cell* cons
     return result;
 }
 
+void HP::AbstractGraph::ChangeConnectionsActiveStateToCell(int cellId, bool)
+{
+    auto cell{ GetCell(cellId) };
+
+    if (cell == nullptr) return;
+
+    //auto connections{ GetConnectionsFromCell(cellId) };
+    auto connections{ m_pHGrid->GetConnectionsFromCell(cellId) };
+    int cellRegion{ cell->GetRegionId() };
+    bool interRegion{ false };
+    
+    for (auto connection : connections)
+    {
+        auto connectedCellRegion{ GetCell(connection->GetToCell())->GetRegionId() };
+
+        if (connectedCellRegion != cellRegion)
+        {
+            interRegion = true;
+        }
+    }
+
+    if (interRegion == true)
+    {
+        RemoveConnectionsOfRegion(cellRegion, RegionConnectionType::BothRegions);
+        GenerateInterRegionConnections(cellRegion);
+    }
+    else
+    {
+        RemoveConnectionsOfRegion(cellRegion, RegionConnectionType::IntraRegion);
+    }
+
+    InterconnectAllCellsOfRegion(cellRegion);
+}
+
 void HP::AbstractGraph::BuildInterRegion()
 {
     m_Connections.clear();
@@ -195,53 +227,112 @@ void HP::AbstractGraph::BuildInterRegion()
 
     for (auto& region : regions)
     {
-        int regionId{ region.GetId() };
-        auto connectedRegions{ regionGrid.GetConnectedCells(regionId) };
+        GenerateInterRegionConnections(region.GetId());
+    }
+}
 
-        auto regionExtConn{ m_pHGrid->GetExternalConnectionFromRegion(regionId) };
+void HP::AbstractGraph::GenerateInterRegionConnections(int regionId)
+{
+    auto regionGrid{ m_pHGrid->GetRegionGrid() };
+    auto connectedRegions{ regionGrid.GetConnectedCells(regionId) };
 
-        for (auto connRegion : connectedRegions)
+    auto regionExtConn{ m_pHGrid->GetExternalConnectionFromRegion(regionId) };
+
+    for (auto connRegion : connectedRegions)
+    {
+        int neighborRegionId{ connRegion->GetId() };
+
+        auto neighborExtConn{ m_pHGrid->GetExternalConnectionFromRegion(neighborRegionId) };
+
+        auto commonConnections{ m_pHGrid->FindCommonConnections(regionExtConn, neighborExtConn) };
+
+        auto commonCells{ m_pHGrid->GetCellsFromConnections(commonConnections) };
+
+        for (auto cell : commonCells)
         {
-            int neighborRegionId{ connRegion->GetId() };
+            if (cell->GetCellType() == CellType::Obstacle) continue;
 
-            auto neighborExtConn{ m_pHGrid->GetExternalConnectionFromRegion(neighborRegionId) };
+            auto iter{ std::ranges::find(m_Cells, cell) };
 
-            auto commonConnections{ m_pHGrid->FindCommonConnections(regionExtConn, neighborExtConn) };
-
-            auto commonCells{ m_pHGrid->GetCellsFromConnections(commonConnections) };
-
-            for (auto cell : commonCells)
+            if (iter == m_Cells.end() and cell->GetRegionId() == regionId)
             {
-                auto iter{ std::ranges::find(m_Cells, cell) };
-
-                if (iter == m_Cells.end() and cell->GetRegionId() == regionId)
-                {
-                    m_Cells.push_back(cell);
-                }
+                m_Cells.push_back(cell);
             }
+        }
 
-            for (auto conn : commonConnections)
-            {
-                auto iter{ std::ranges::find(m_Connections, *conn) };
+        for (auto conn : commonConnections)
+        {
+            auto iter{ std::ranges::find(m_Connections, *conn) };
 
-                if (iter != m_Connections.end()) continue;
+            if (iter != m_Connections.end()) continue;
 
-                CreateConnection(
-                    conn->GetFromCell(), conn->GetToCell());
-            }
+            CreateConnection(
+                conn->GetFromCell(), conn->GetToCell());
         }
     }
 }
 
 void HP::AbstractGraph::BuildIntraRegion()
 {
-    for (auto& regionId : GetRegionIds())
+    for (int regionId : GetRegionIds())
     {
-        auto regionCells{ GetCellsFromRegion(regionId) };
+        InterconnectAllCellsOfRegion(regionId);
+    }
+}
 
-        for (auto cell : regionCells)
+void HP::AbstractGraph::InterconnectAllCellsOfRegion(int regionId)
+{
+    auto regionCells{ GetCellsFromRegion(regionId) };
+
+    for (auto cell : regionCells)
+    {
+        SetConnectionsToCell(cell, regionCells, true);
+    }
+}
+
+void HP::AbstractGraph::RemoveConnectionsOfRegion(int regionId, RegionConnectionType regionConnectionType)
+{
+    std::vector<Connection> connectionsToRemove{};
+
+    for (auto const& connection : m_Connections)
+    {
+        auto fromCell{ GetCell(connection.GetFromCell()) };
+        auto toCell{ GetCell(connection.GetToCell()) };
+
+        if (fromCell == nullptr or toCell == nullptr) continue;
+
+        switch (regionConnectionType)
         {
-            SetConnectionsToCell(cell, regionCells, true);
+        case RegionConnectionType::IntraRegion:
+            if (fromCell->GetRegionId() == regionId and toCell->GetRegionId() == regionId)
+            {
+                connectionsToRemove.push_back(connection);
+            }
+            break;
+        case RegionConnectionType::InterRegion:
+            if ((fromCell->GetRegionId() == regionId and toCell->GetRegionId() != regionId)
+                or
+                (fromCell->GetRegionId() != regionId and toCell->GetRegionId() == regionId)
+                )
+            {
+                connectionsToRemove.push_back(connection);
+            }
+            break;
+        case RegionConnectionType::BothRegions:
+            if (fromCell->GetRegionId() == regionId or toCell->GetRegionId() == regionId)
+            {
+                connectionsToRemove.push_back(connection);
+            }
+            break;
+        }
+    }
+
+    for (auto const& connection : connectionsToRemove)
+    {
+        auto iter{ std::ranges::find(m_Connections, connection) };
+        if (iter != m_Connections.end())
+        {
+            m_Connections.erase(iter);
         }
     }
 }

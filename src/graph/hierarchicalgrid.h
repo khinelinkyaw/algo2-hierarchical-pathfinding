@@ -24,6 +24,7 @@ namespace HP
         std::unordered_map<int, Matrix<Cell*>> m_CellRegions{};
 
         void SubdivideCellsIntoRegions();
+        void ChangeConnectionsActiveStateToCell(int cellId, bool state) override;
         
     public:
         void Draw() const override;

@@ -11,12 +11,18 @@
 
 namespace HP
 {
+    enum class RegionConnectionType
+    {
+        InterRegion,
+        IntraRegion,
+        BothRegions
+    };
+
     class HierarchicalGrid;
     class AbstractGraph final : public Graph
     {
     private:
         HierarchicalGrid* m_pHGrid{ nullptr };
-        std::vector<Connection> m_Connections{};
         std::vector<Cell*> m_Cells{};
 
         void SetConnectionsToCell(Cell* cell, std::vector<Cell*> toConnCells, bool intraRegion);
@@ -24,7 +30,12 @@ namespace HP
         std::vector<int> GetRegionIds() const;
 
         void BuildInterRegion();
+        void GenerateInterRegionConnections(int regionId);
         void BuildIntraRegion();
+
+        void InterconnectAllCellsOfRegion(int regionId);
+
+        void RemoveConnectionsOfRegion(int regionId, RegionConnectionType regionConnectionType);
 
         void AddCell(Cell* cell);
         void CreateConnection(Cell* cellA, Cell* cellB, bool intraRegion);
@@ -48,6 +59,8 @@ namespace HP
         void Draw() const override;
 
         AStar::PathResult FindPath(Cell* const pStartCell, Cell* const pDestCell, std::vector<Cell*>* finalPath);
+
+        void ChangeConnectionsActiveStateToCell(int cellId, bool state) override;
 
         AbstractGraph(HierarchicalGrid* pHGrid);
         ~AbstractGraph() override = default;
